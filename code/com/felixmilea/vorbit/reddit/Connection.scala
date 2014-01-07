@@ -3,12 +3,13 @@ package com.felixmilea.vorbit.reddit
 import java.io.IOException
 import java.io.OutputStreamWriter
 import java.net.HttpURLConnection
-import java.net.URL
 import java.io.BufferedReader
 import java.io.InputStreamReader
 
-class Connection(url: URL, params: ConnectionParameters = new ConnectionParameters) {
-  private val conn = url.openConnection().asInstanceOf[HttpURLConnection]
+class Connection(uri: String, params: ConnectionParameters = new ConnectionParameters) {
+  import ConnectionUtils._
+
+  private val conn = URL(uri).openConnection().asInstanceOf[HttpURLConnection]
   private val data = params.toString
   private var resp: String = null
 
@@ -39,6 +40,7 @@ class Connection(url: URL, params: ConnectionParameters = new ConnectionParamete
   }
 
   def response(cached: Boolean = true): String = if (cached && resp != null) return resp else retrieveResponse
+  def response: String = response(true)
 
   private def retrieveResponse: String = {
     val reader = new BufferedReader(new InputStreamReader(conn.getInputStream()))

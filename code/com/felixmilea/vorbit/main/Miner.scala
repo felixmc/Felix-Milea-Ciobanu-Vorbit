@@ -2,14 +2,17 @@ package com.felixmilea.vorbit.main
 
 import com.felixmilea.vorbit.reddit.Credential
 import com.felixmilea.vorbit.reddit.ConnectionParameters
+import com.felixmilea.vorbit.reddit.Client
 
 object Miner extends App {
 
   // get first miner user
-  val user = Credential.fromFile("config/miners.config").head
+  val token = Credential.fromFile("config/miners.config").head
 
-  val params = new ConnectionParameters
-  params += ("persist", "true")
+  val client = new Client
 
-  println(params)
+  if (client.authenticate(token)) {
+    println(s"Client authenticated with cookie ${client.cookie}")
+  }
+
 }
