@@ -13,7 +13,7 @@ object Credential {
   def fromFile(filePath: String): List[Credential] = {
     return Source.fromFile(filePath).getLines.map(line => {
       val parts = line.split(":")
-      new Credential(parts(0), parts(1))
+      new Credential(parts(0).trim, parts(1).trim)
     }).toList
   }
 

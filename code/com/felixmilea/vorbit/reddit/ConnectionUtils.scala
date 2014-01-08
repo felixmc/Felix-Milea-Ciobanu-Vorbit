@@ -8,7 +8,7 @@ object ConnectionUtils {
 
   val RN = "\r\n"
 
-  val baseURL = "http://www.reddit.com/api/"
+  val baseURL = "http://www.reddit.com/"
   val authURL = new URL(baseURL + "login")
 
   val userAgent = s"VorbitBot/${version} (http://felixmilea.com/vorbitbot/)"

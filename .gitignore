@@ -10,6 +10,7 @@ local.properties
 .settings/
 .loadpath
 .cache
+appdata/
 
 # External tool builders
 .externalToolBuilders/
