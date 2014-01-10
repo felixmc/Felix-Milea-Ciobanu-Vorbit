@@ -1,8 +1,6 @@
 package com.felixmilea.vorbit.reddit
 
-import sys.process._
 import scala.io.Source
-import java.util.Date
 
 object SessionManager {
   private val sessionsFile = "appdata/sessions.data"
@@ -14,7 +12,7 @@ object SessionManager {
       Source.fromFile(sessionsFile).getLines.foreach(line =>
         if (!line.isEmpty()) {
           val parts = line.split("/")
-          val session = new Session(parts(1), parts(2), new Date(parts(3).toLong))
+          val session = new Session(parts(1), parts(2), new java.util.Date(parts(3).toLong))
           if (!session.isExpired) sessions += parts(0) -> session
         })
   }
@@ -25,7 +23,10 @@ object SessionManager {
   def persist() {
     val sb = new StringBuilder
     sessions.foreach((item) => sb ++= s"${item._1}/${item._2.modhash}/${item._2.cookie}/${item._2.expiration.getTime}\n")
-    s"echo ${sb.mkString.dropRight(1)}" #> new java.io.File(sessionsFile) !
+    val pw = new java.io.PrintWriter(sessionsFile)
+    pw.println(sb.mkString.dropRight(1))
+    pw.flush
+    pw.close
   }
 
 }

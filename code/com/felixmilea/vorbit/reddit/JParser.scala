@@ -24,7 +24,7 @@ object JParser {
         Some(M(map)) <- List(input)
         M(json) = map("json")
         L(errors) = json("errors")
-        M(data) = json.getOrElse("data", Seq().toMap)
+        M(data) = json.getOrElse("data", Map())
         S(modhash) = data.getOrElse("modhash", null)
         S(cookie) = data.getOrElse("cookie", null)
       } yield {
@@ -32,6 +32,30 @@ object JParser {
           ("modhash" -> modhash),
           ("cookie" -> cookie)).toMap
       }
+    }
+
+    def t1(input: Some[Any]): List[Map[String, AnyRef]] = {
+      return null
+    }
+
+    def t2(input: Some[Any]): List[Map[String, AnyRef]] = {
+      return null
+    }
+
+    def t3(input: Some[Any]): List[Map[String, AnyRef]] = {
+      return null
+    }
+
+    def t4(input: Some[Any]): List[Map[String, AnyRef]] = {
+      return null
+    }
+
+    def t5(input: Some[Any]): List[Map[String, AnyRef]] = {
+      return null
+    }
+
+    def t6(input: Some[Any]): List[Map[String, AnyRef]] = {
+      return null
     }
   }
 

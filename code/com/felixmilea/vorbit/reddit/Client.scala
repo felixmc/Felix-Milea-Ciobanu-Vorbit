@@ -8,16 +8,11 @@ class Client {
   def authenticate(cred: Credential): Boolean = SessionManager.findSession(cred.username) match {
     case Some(sess) =>
       session = sess
-      println("using cached session")
       return true
     case None =>
-      println("using fresh session")
-
       val params = new ConnectionParameters
 
-      params += "user" -> cred.username
-      params += "passwd" -> cred.password
-      params += "rem" -> "true"
+      params ++= Seq(("user" -> cred.username), ("passwd" -> cred.password), ("rem" -> "true"))
 
       val conn = new Connection(Nodes.login, params, true)
       val data = JParser.parse(conn.response, JParser.Strategy.login)(0)
