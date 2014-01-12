@@ -11,6 +11,8 @@ local.properties
 .loadpath
 .cache
 appdata/
+derbyDB/
+derby.log
 
 # External tool builders
 .externalToolBuilders/
