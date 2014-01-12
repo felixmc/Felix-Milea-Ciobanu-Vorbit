@@ -8,7 +8,7 @@ object Miner extends App {
 
   SessionManager.init
 
-  // get first miner user
+  //  get first miner user
   val token = Credential.fromFile("config/miners.config").head
 
   val client = new Client
@@ -19,4 +19,5 @@ object Miner extends App {
   }
 
   SessionManager.persist
+
 }
