@@ -9,26 +9,24 @@ object Log {
   private val datetimeFormat = new SimpleDateFormat("EEE MMM dd HH:mm:ss yyyy")
   private val timeFormat = new SimpleDateFormat("HH:mm:ss")
   private val logFileFormat = "appdata/logs/%s.log"
-  val out = System.out
+  private val messagePadding = 7
+  private val out = System.out
+  private var logFile: String = null
   var printLevel = 0
   var fileLevel = 1
-  private var logFile: String = null
-  private var alternateTimestampColor = false
-  private val messagePadding = 7
 
-  def init(fLevel: Int = 1, pLevel: Int = 0) {
-    printLevel = pLevel
-    fileLevel = fLevel
-    logFile = String.format(logFileFormat, datetime.replace(':', '.'))
-    new File("appdata/logs.bob.log").createNewFile()
-  }
+  // "constructor"
+  logFile = String.format(logFileFormat, datetime.replace(':', '.'))
+  new File("appdata/logs.bob.log").createNewFile()
+  // end
 
   private def timestamp = timeFormat.format(new Date)
   private def datetime = datetimeFormat.format(new Date)
 
-  private def writeToFile(text: String) {
+  private def printlnToFile(text: String) = printToFile(s"$text\n")
+  private def printToFile(text: String) {
     val fw = new FileWriter(logFile, true)
-    fw.write(s"$text\n")
+    fw.write(text)
     fw.close()
   }
 
@@ -36,12 +34,10 @@ object Log {
     val padding = " " * (7 - label.length)
     final def apply(message: String) {
       if (printLevel <= level) {
-        val tColor = if (alternateTimestampColor) s"${Console.WHITE_B}${Console.BLACK}" else Console.WHITE
-        out.println(s"${Console.RESET}$tColor $timestamp ${Console.RESET}$labelColor $padding$label ${Console.RESET}$messageColor $message${Console.RESET}")
-        alternateTimestampColor = !alternateTimestampColor
+        out.println(s"${Console.RESET}$labelColor $timestamp $padding$label ${Console.RESET}$messageColor $message${Console.RESET}")
       }
       if (fileLevel <= level)
-        writeToFile(s"[$timestamp] $label:$padding $message")
+        printlnToFile(s"[$timestamp] $label:$padding $message")
     }
   }
 
