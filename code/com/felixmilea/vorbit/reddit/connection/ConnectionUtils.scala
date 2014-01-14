@@ -1,7 +1,6 @@
-package com.felixmilea.vorbit.reddit
+package com.felixmilea.vorbit.reddit.connection
 
 import java.net.URL
-import java.util.HashMap
 
 object ConnectionUtils {
   val version = "0.1"

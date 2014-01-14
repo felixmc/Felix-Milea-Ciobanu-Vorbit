@@ -1,10 +1,12 @@
-package com.felixmilea.vorbit.reddit
+package com.felixmilea.vorbit.reddit.connection
 
 import java.io.IOException
 import java.io.OutputStreamWriter
 import java.net.HttpURLConnection
 import java.io.BufferedReader
 import java.io.InputStreamReader
+import com.felixmilea.vorbit.reddit.connection.ConnectionUtils
+import com.felixmilea.vorbit.reddit.connection.ConnectionParameters
 
 class Connection(uri: String, params: ConnectionParameters = new ConnectionParameters(), isPost: Boolean = false, headers: Map[String, String] = Map()) {
   import ConnectionUtils._

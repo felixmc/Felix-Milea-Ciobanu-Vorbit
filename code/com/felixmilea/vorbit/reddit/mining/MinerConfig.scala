@@ -1,4 +1,4 @@
-package com.felixmilea.vorbit.reddit
+package com.felixmilea.vorbit.reddit.mining
 
 class MinerConfig {
   var subredditMode = MinerConfig.SubredditMode.Blacklist

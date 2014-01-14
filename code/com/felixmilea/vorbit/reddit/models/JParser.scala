@@ -1,7 +1,6 @@
-package com.felixmilea.vorbit.reddit
+package com.felixmilea.vorbit.reddit.models
 
 import scala.util.parsing.json.JSON
-import scala.collection.immutable.HashMap
 
 object JParser {
 

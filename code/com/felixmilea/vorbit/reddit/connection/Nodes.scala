@@ -1,4 +1,4 @@
-package com.felixmilea.vorbit.reddit
+package com.felixmilea.vorbit.reddit.connection
 
 object Nodes {
 

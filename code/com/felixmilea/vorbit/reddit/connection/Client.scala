@@ -1,5 +1,15 @@
 package com.felixmilea.vorbit.reddit
 
+import com.felixmilea.vorbit.managers.SessionManager
+import com.felixmilea.vorbit.reddit.connection.Session
+import com.felixmilea.vorbit.reddit.Connection
+imimport com.felixmilea.vorbit.reddit.connection.Credential
+import com.felixmilea.vorbit.reddit.connection.Connection
+import com.felixmilea.vorbit.reddit.connection.ConnectionParameters
+port com.felixmilea.vorbit.reddit.ConnectionParameters
+import com.felixmilea.vorbit.reddit.Credential
+import com.felixmilea.vorbit.reddit.models.JParser
+
 class Client {
   var session: Session = null
 

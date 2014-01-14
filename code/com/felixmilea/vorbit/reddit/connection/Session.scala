@@ -1,7 +1,8 @@
-package com.felixmilea.vorbit.reddit
+package com.felixmilea.vorbit.reddit.connection
 
 import java.util.Date
 import java.text.SimpleDateFormat
+import com.felixmilea.vorbit.reddit.connection.Connection
 
 class Session(_modhash: String, _cookie: String, _expiration: Date) {
   val modhash = _modhash
