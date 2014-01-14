@@ -4,21 +4,29 @@ import java.util.Date
 import java.text.SimpleDateFormat
 import java.io.FileWriter
 import java.io.File
+import java.net.Socket
+import java.io.PrintStream
 
-object Log {
+object Log extends Initable {
   private val datetimeFormat = new SimpleDateFormat("EEE MMM dd HH:mm:ss yyyy")
   private val timeFormat = new SimpleDateFormat("HH:mm:ss")
   private val logFileFormat = "appdata/logs/%s.log"
   private val messagePadding = 7
-  private val out = System.out
+  private var out = System.out
   private var logFile: String = null
   var printLevel = 0
   var fileLevel = 1
 
   // "constructor"
-  logFile = String.format(logFileFormat, datetime.replace(':', '.'))
-  new File("appdata/logs.bob.log").createNewFile()
-  // end
+  {
+    logFile = String.format(logFileFormat, datetime.replace(':', '.'))
+    new File("appdata/logs.bob.log").createNewFile()
+  }
+
+  def init() {
+    val socket = new Socket(LogServer.HOSTNAME, LogServer.PORT)
+    out = new PrintStream(socket.getOutputStream(), true)
+  }
 
   private def timestamp = timeFormat.format(new Date)
   private def datetime = datetimeFormat.format(new Date)
@@ -33,9 +41,8 @@ object Log {
   protected abstract class Logger(val labelColor: String, val messageColor: String, val label: String, val level: Int) {
     val padding = " " * (7 - label.length)
     final def apply(message: String) {
-      if (printLevel <= level) {
+      if (printLevel <= level)
         out.println(s"${Console.RESET}$labelColor $timestamp $padding$label ${Console.RESET}$messageColor $message${Console.RESET}")
-      }
       if (fileLevel <= level)
         printlnToFile(s"[$timestamp] $label:$padding $message")
     }
