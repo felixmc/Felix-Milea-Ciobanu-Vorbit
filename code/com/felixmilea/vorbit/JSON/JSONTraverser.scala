@@ -8,7 +8,7 @@ class JSONTraverser(val data: Option[AnyRef]) {
   def apply[T <: AnyRef](index: String): JSONTraverser = return new JSONTraverser(apply[T](Right(index)))
   def apply[T <: AnyRef](index: Int): JSONTraverser = return new JSONTraverser(apply[T](Left(index)))
 
-  def apply[T <: AnyRef](extractor: JSONParser.JExtractor[T]): Option[T] =
+  def apply[T <: AnyRef](extractor: JSONParser.JExtractor[T] = JSONParser.S): Option[T] =
     data match {
       case Some(data) => extractor.unapply(data)
       case None => None
