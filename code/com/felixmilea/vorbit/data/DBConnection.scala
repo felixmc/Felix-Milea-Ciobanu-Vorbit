@@ -26,7 +26,7 @@ class DBConnection {
     Class.forName("com.mysql.jdbc.Driver")
     conn = DriverManager.getConnection(s"$protocol${DBConfig("host")}:3306/${DBConfig("database")}", props)
     //    conn = new Driver().connect(s"$protocol${DBConfig("host")}/${DBConfig("database")}", props)
-    Log.Debug(s"Connected to database `${DBConfig("database")}`")
+    //    Log.Debug(s"Connected to database `${DBConfig("database")}`")
 
     conn.setAutoCommit(false)
     statement = conn.createStatement

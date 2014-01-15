@@ -23,7 +23,7 @@ object MinerConfig {
 
   def parse(json: JSONTraverser): MinerConfig = {
     return new MinerConfig {
-      subreddits = json("config")("subreddits")(JSONParser.L).get.asInstanceOf[List[String]]
+      subreddits = json("config")("subreddits")(JSONParser.L).get.asInstanceOf[List[Option[String]]].map(o => o.get)
       postMaxAge = json("config")("postMaxAge")(JSONParser.I).get
       commentMaxAge = json("config")("commentMaxAge")(JSONParser.I).get
       postMinKarma = json("config")("postMinKarma")(JSONParser.I).get

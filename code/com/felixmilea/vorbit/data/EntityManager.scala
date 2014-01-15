@@ -4,6 +4,8 @@ import com.felixmilea.vorbit.reddit.models.RedditPost
 import com.felixmilea.vorbit.reddit.models.Comment
 import com.felixmilea.vorbit.reddit.models.Post
 import java.sql.Date
+import com.mysql.jdbc.exceptions.MySQLIntegrityConstraintViolationException
+import com.felixmilea.vorbit.utils.Log
 
 object EntityManager {
 
@@ -28,10 +30,13 @@ object EntityManager {
     ps.setDate(13, new Date(post.date_posted.getTime()))
     ps.setDate(14, new Date(new java.util.Date().getTime()))
 
-    println(ps)
-
-    println("execute output: " + ps.executeUpdate())
-    conn.commit()
+    try {
+      ps.executeUpdate()
+      conn.commit()
+    } catch {
+      //      case cve: MySQLIntegrityConstraintViolationException => 
+      case t: Throwable => Log.Warning(s"Attempted to insert already existing post with id `${post.redditId}`.")
+    }
     conn.close()
   }
 

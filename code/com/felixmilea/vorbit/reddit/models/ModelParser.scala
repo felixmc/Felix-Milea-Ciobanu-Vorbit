@@ -20,7 +20,9 @@ object ModelParser {
         case Some(list) => list.length
         case _ => 0
       }
-      new Comment(redditId = json("id")().get, parentId = json("parent_id")().get, author = json("author")().get,
+      new Comment(redditId = json("id")().get,
+        parentId = json("parent_id")().get,
+        author = json("author")().get,
         subreddit = json("subreddit")().get, content = json("body")().get, ups = json("ups")(JSONParser.I).get,
         downs = json("downs")(JSONParser.I).get, gilded = json("gilded")(JSONParser.I).get, children_count = replies,
         date_posted = new Date(json("created")(JSONParser.D).get.toLong * 1000))
