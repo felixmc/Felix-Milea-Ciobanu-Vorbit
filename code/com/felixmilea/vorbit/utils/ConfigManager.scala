@@ -7,11 +7,13 @@ import scala.io.Source
 import com.felixmilea.vorbit.JSON.JSONParser
 import scala.util.parsing.json.JSONObject
 import com.felixmilea.vorbit.JSON.JSONTraverser
+import com.felixmilea.vorbit.data.DBConfig
 
 object ConfigManager extends Initable {
   private val configDir = "config/"
   private val configExt = ".config.json"
   private val configValues = new HashMap[String, JSONTraverser]()
+  private val configs = Seq[Initable](DBConfig)
 
   def init() {
     Log.Info("Initializing ConfigManager..")
@@ -29,6 +31,8 @@ object ConfigManager extends Initable {
         case None => Log.Warning(s"\t- Could not parse config file `$file`")
       }
     })
+
+    configs.foreach { _.init }
   }
 
   def apply(config: String): JSONTraverser = configValues.getOrElse(config, new JSONTraverser(None))
