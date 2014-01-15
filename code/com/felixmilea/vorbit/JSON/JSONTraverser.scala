@@ -17,8 +17,12 @@ class JSONTraverser(val data: Option[AnyRef]) {
   def apply[T](index: Either[Int, String]): Option[T] =
     try {
       (data, index) match {
-        case (Some(data), Left(i)) => if (data.isInstanceOf[JSONArray]) return Some(data.asInstanceOf[JSONArray].list(i).asInstanceOf[T])
-        case (Some(data), Right(s)) => if (data.isInstanceOf[JSONObject]) return Some(data.asInstanceOf[JSONObject].obj(s).asInstanceOf[T])
+        case (Some(data), Left(i)) =>
+          if (data.isInstanceOf[JSONArray]) return Some(data.asInstanceOf[JSONArray].list(i).asInstanceOf[T])
+          else if (data.isInstanceOf[List[T]]) return Some(data.asInstanceOf[List[T]](i))
+        case (Some(data), Right(s)) =>
+          if (data.isInstanceOf[JSONObject]) return Some(data.asInstanceOf[JSONObject].obj(s).asInstanceOf[T])
+          else if (data.isInstanceOf[Map[String, T]]) return Some(data.asInstanceOf[Map[String, T]](s))
         case _ => None
       }
       return None

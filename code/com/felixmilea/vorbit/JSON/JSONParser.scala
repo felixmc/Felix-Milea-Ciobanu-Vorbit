@@ -34,8 +34,26 @@ object JSONParser {
   }
 
   object M extends JExtractor[Map[String, AnyRef]]
-  object L extends JExtractor[List[AnyRef]]
+  object L extends JExtractor[List[AnyRef]] {
+    override def unapply(a: AnyRef): Option[List[AnyRef]] = {
+      if (a.isInstanceOf[JSONArray]) {
+        val r = a.asInstanceOf[JSONArray].list.map(item => {
+          unapply(item.asInstanceOf[AnyRef])
+        })
+        Some(r)
+      } else {
+        super.unapply(a)
+      }
+    }
+  }
   object D extends JExtractor[java.lang.Double] { stringParseFunc = java.lang.Double.parseDouble }
+  object I extends JExtractor[java.lang.Integer] {
+    override def unapply(a: AnyRef): Option[Integer] =
+      D.unapply(a) match {
+        case Some(num) => Some(num.toInt)
+        case None => None
+      }
+  }
   object B extends JExtractor[java.lang.Boolean] { stringParseFunc = java.lang.Boolean.parseBoolean }
   object S extends JExtractor[String] {
     override def unapply(a: AnyRef): Option[String] = Some(a.toString)
