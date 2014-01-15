@@ -1,4 +1,4 @@
-package com.felixmilea.vorbit.reddit.connection
+package com.felixmilea.vorbit.reddit.connectivity
 
 import scala.io.Source
 

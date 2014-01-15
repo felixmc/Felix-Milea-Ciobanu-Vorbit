@@ -1,12 +1,12 @@
-package com.felixmilea.vorbit.reddit.connection
+package com.felixmilea.vorbit.reddit.connectivity
 
 import java.io.IOException
 import java.io.OutputStreamWriter
 import java.net.HttpURLConnection
 import java.io.BufferedReader
 import java.io.InputStreamReader
-import com.felixmilea.vorbit.reddit.connection.ConnectionUtils
-import com.felixmilea.vorbit.reddit.connection.ConnectionParameters
+import com.felixmilea.vorbit.utils.Log
+import java.net.UnknownHostException
 
 class Connection(uri: String, params: ConnectionParameters = new ConnectionParameters(), isPost: Boolean = false, headers: Map[String, String] = Map()) {
   import ConnectionUtils._
@@ -20,7 +20,7 @@ class Connection(uri: String, params: ConnectionParameters = new ConnectionParam
 
   conn.setRequestProperty("User-Agent", ConnectionUtils.userAgent)
   conn.setRequestProperty("charset", "utf-8")
-  conn.setInstanceFollowRedirects(false)
+  conn.setInstanceFollowRedirects(true)
   conn.setUseCaches(false)
   conn.setDoOutput(true)
 
@@ -33,7 +33,8 @@ class Connection(uri: String, params: ConnectionParameters = new ConnectionParam
     try {
       writeData()
     } catch {
-      case e: IOException => error("Error writing data to connection: " + e)
+      case ioe: IOException => Log.Error("VorbitBot encountered an error while writing data to connection: " + ioe)
+      case uhe: UnknownHostException => Log.Error("VorbitBot encountered an error while connecting to host: " + uhe)
     }
   }
 
