@@ -11,8 +11,6 @@ local.properties
 .loadpath
 .cache
 appdata/
-derby.log
-VorbitDB/
 
 # External tool builders
 .externalToolBuilders/

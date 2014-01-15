@@ -1,3 +1,8 @@
 {
-	"dbName" : "VorbitDB"
+	"host": "localhost",
+	"username": "",
+	"password": "",
+	"database": "vorbit",
+	"setup_file": "config/db_setup.sql",
+	"mined_data_table_prefix": "mined_data_"
 }
