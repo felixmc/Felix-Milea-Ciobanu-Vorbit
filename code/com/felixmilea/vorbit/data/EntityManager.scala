@@ -9,7 +9,7 @@ import com.felixmilea.vorbit.utils.Log
 
 object EntityManager {
 
-  def insertPost(post: RedditPost, table: String) {
+  def insertPost(post: RedditPost, table: String): Boolean = {
     val conn = mkConn()
     val ps = conn.prepareStatement(s"INSERT INTO `mined_data_$table`(`reddit_id`, `parent`, `type`, `author`, `subreddit`, `title`, `content`, `children_count`, `ups`, `downs`, `gilded`, `miner`, `date_posted`, `date_mined`) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
 
@@ -30,14 +30,20 @@ object EntityManager {
     ps.setDate(13, new Date(post.date_posted.getTime()))
     ps.setDate(14, new Date(new java.util.Date().getTime()))
 
+    var success = true
+
     try {
       ps.executeUpdate()
       conn.commit()
     } catch {
       //      case cve: MySQLIntegrityConstraintViolationException => 
-      case t: Throwable => Log.Warning(s"Attempted to insert already existing post with id `${post.redditId}`.")
+      case t: Throwable => {
+        Log.Warning(s"Attempted to insert already existing post with id `${post.redditId}`.")
+        success = false
+      }
     }
     conn.close()
+    return success
   }
 
   def getAllPosts(): List[RedditPost] = {

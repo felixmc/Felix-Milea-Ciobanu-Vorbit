@@ -6,6 +6,10 @@ import com.felixmilea.vorbit.utils.Initable
 import com.felixmilea.vorbit.data.Setup
 import com.felixmilea.scala.console.ConsoleMenuApp
 import com.felixmilea.scala.console.MenuItem
+import com.felixmilea.scala.console.ConsoleMenu
+import com.felixmilea.vorbit.JSON.JSONParser
+import com.felixmilea.vorbit.reddit.mining.Miner
+import com.felixmilea.vorbit.reddit.mining.MinerConfig
 
 object Vorbit extends ConsoleMenuApp {
 
@@ -14,7 +18,7 @@ object Vorbit extends ConsoleMenuApp {
   override def start() {
     Log.init()
     Log.Info("Vorbit started.")
-    Seq[Initable](ConfigManager, Setup).foreach(i => i.init)
+    Seq[Initable](ConfigManager, Setup).foreach { _.init }
 
     setupMenu()
 
@@ -23,12 +27,31 @@ object Vorbit extends ConsoleMenuApp {
 
   def setupMenu() {
     menu.title = "Vorbit v0.1"
-    menu.addItem(new MenuItem("Do Something", something))
+    menu.addItem(new MenuItem("Start A Miner", miners))
   }
 
-  def something() {
-    println("Doing something..")
-    Log.Info("Vorbit is doing something")
+  def miners() {
+    val mm = new ConsoleMenu("MinerMenu")
+
+    def quit(miner: Miner) {
+      miner.stop();
+    }
+
+    for (i <- 0 until ConfigManager("miners")(JSONParser.L).get.length) {
+      val minerConfig = MinerConfig.parse(ConfigManager("miners")(i))
+      mm.addItem(new MenuItem(minerConfig.name, () => {
+        val miner = new Miner(minerConfig, 200)
+        miner.start()
+        println("Press enter to stop miner..")
+        Console.readLine()
+        quit(miner)
+      }))
+    }
+
+    mm.addItem(new MenuItem("Go back", () => {}))
+
+    mm.promptMenu()
+
   }
 
 }

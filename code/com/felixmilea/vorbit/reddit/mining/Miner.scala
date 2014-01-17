@@ -28,8 +28,8 @@ class Miner(val config: MinerConfig, posts: Int) extends Thread {
         val post = ModelParser.parse(ModelParser.T3)(postNode)
         if ((post.ups - post.downs) >= config.postMinKarma
           && post.date_posted.getTime() >= new Date().getTime() - config.postMaxAge) {
-          EntityManager.insertPost(post, config.name)
-          Log.Info(s"Mined post with id `${post.redditId}`")
+          if (EntityManager.insertPost(post, config.name))
+            Log.Info(s"Mined post with id `${post.redditId}`")
 
           val commentJson = new JSONTraverser(Option(JSON.parseFull(client.get(s"comments/${post.redditId}.json")).get.asInstanceOf[AnyRef]))
           val commentNode = commentJson(1)("data")("children")
@@ -44,7 +44,10 @@ class Miner(val config: MinerConfig, posts: Int) extends Thread {
                 Log.Info(s"Mined comment with id `${comment.redditId}`")
               }
             } catch {
-              case nse: NoSuchElementException => Log.Warning("Could not parse a comment.")
+              case nse: NoSuchElementException => {
+                val id = commentNode(comIndex)("data")("id")().get
+                Log.Warning(s"Could not parse a comment with `$id` on thread with id `${post.redditId}`.")
+              }
             }
           }
         }
