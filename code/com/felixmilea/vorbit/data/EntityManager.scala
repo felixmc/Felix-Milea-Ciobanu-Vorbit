@@ -3,7 +3,6 @@ package com.felixmilea.vorbit.data
 import com.felixmilea.vorbit.reddit.models.RedditPost
 import com.felixmilea.vorbit.reddit.models.Comment
 import com.felixmilea.vorbit.reddit.models.Post
-import java.sql.Date
 import com.mysql.jdbc.exceptions.MySQLIntegrityConstraintViolationException
 import com.felixmilea.vorbit.utils.Log
 
@@ -27,8 +26,8 @@ object EntityManager {
     ps.setInt(10, post.downs)
     ps.setInt(11, if (isComment) post.asInstanceOf[Comment].gilded else 0)
     ps.setInt(12, 1)
-    ps.setDate(13, new Date(post.date_posted.getTime()))
-    ps.setDate(14, new Date(new java.util.Date().getTime()))
+    ps.setDate(13, new java.sql.Date(post.date_posted.getTime()))
+    ps.setDate(14, new java.sql.Date(new java.util.Date().getTime()))
 
     var success = true
 
@@ -36,7 +35,6 @@ object EntityManager {
       ps.executeUpdate()
       conn.commit()
     } catch {
-      //      case cve: MySQLIntegrityConstraintViolationException => 
       case t: Throwable => {
         Log.Warning(s"\t\tAttempted to insert already existing post with id `${post.redditId}`")
         success = false
