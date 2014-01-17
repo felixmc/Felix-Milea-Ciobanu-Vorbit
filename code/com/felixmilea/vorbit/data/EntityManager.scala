@@ -38,7 +38,7 @@ object EntityManager {
     } catch {
       //      case cve: MySQLIntegrityConstraintViolationException => 
       case t: Throwable => {
-        Log.Warning(s"Attempted to insert already existing post with id `${post.redditId}`.")
+        Log.Warning(s"\t\tAttempted to insert already existing post with id `${post.redditId}`")
         success = false
       }
     }

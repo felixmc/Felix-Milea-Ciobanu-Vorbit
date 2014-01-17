@@ -9,6 +9,7 @@ import scala.util.parsing.json.JSON
 import com.felixmilea.vorbit.JSON.JSONParser
 import com.felixmilea.vorbit.utils.Log
 import java.util.Date
+import com.felixmilea.vorbit.analysis.WordParser
 
 class Miner(val config: MinerConfig, posts: Int) extends Thread {
 
@@ -19,42 +20,44 @@ class Miner(val config: MinerConfig, posts: Int) extends Thread {
   client.authenticate(token)
 
   override def run() {
+    Log.Info(s"Starting data mining operation `${config.name}`")
 
     for (subreddit <- config.subreddits) {
-      val posts = new JSONTraverser(Option(JSON.parseFull(client.get(s"r/$subreddit/hot.json")).get.asInstanceOf[AnyRef]))("data")("children")
+      Log.Info(s"\tMining subreddit `$subreddit`")
+      val posts = new JSONTraverser(Option(JSON.parseFull(client.get(s"r/$subreddit/hot.json?limit=100")).get.asInstanceOf[AnyRef]))("data")("children")
 
       for (postIndex <- 0 until posts(JSONParser.L).get.length) {
         val postNode = posts(postIndex)("data")
         val post = ModelParser.parse(ModelParser.T3)(postNode)
-        if ((post.ups - post.downs) >= config.postMinKarma
+        if (post.karma >= config.postMinKarma
           && post.date_posted.getTime() >= new Date().getTime() - config.postMaxAge) {
           if (EntityManager.insertPost(post, config.name))
-            Log.Info(s"Mined post with id `${post.redditId}`")
+            Log.Debug(s"\t\tMining post `${post.redditId}` ngrams found: ${WordParser.parseAsText(post.title)}")
 
-          val commentJson = new JSONTraverser(Option(JSON.parseFull(client.get(s"comments/${post.redditId}.json")).get.asInstanceOf[AnyRef]))
+          val commentJson = new JSONTraverser(Option(JSON.parseFull(client.get(s"comments/${post.redditId}.json?sort=top")).get.asInstanceOf[AnyRef]))
           val commentNode = commentJson(1)("data")("children")
 
           for (comIndex <- 0 until commentNode(JSONParser.L).get.length) {
             try {
               val comment = ModelParser.parse(ModelParser.T1)(commentNode(comIndex)("data"))
               if (comment.gilded >= config.minGild
-                && (comment.ups - comment.downs) >= config.commentMinKarma
+                && comment.karma >= config.commentMinKarma
                 && comment.date_posted.getTime() >= new Date().getTime() - config.commentMaxAge) {
-                EntityManager.insertPost(comment, config.name)
-                Log.Info(s"Mined comment with id `${comment.redditId}`")
+                if (EntityManager.insertPost(comment, config.name))
+                  Log.Debug(s"\t\tMinining comment `${comment.redditId}` on thread `${post.redditId}` ngrams found: ${WordParser.parseAsText(comment.content)}")
               }
             } catch {
               case nse: NoSuchElementException => {
                 val id = commentNode(comIndex)("data")("id")().get
-                Log.Warning(s"Could not parse a comment with `$id` on thread with id `${post.redditId}`.")
+                Log.Warning(s"\t\tError parsing comment `$id` on thread `${post.redditId}`")
               }
             }
           }
         }
       }
-
     }
 
+    Log.Info(s"Commencing data mining operation `${config.name}`")
   }
 
 }

@@ -16,7 +16,7 @@ object ConfigManager extends Initable {
   private val configs = Seq[Initable](DBConfig)
 
   def init() {
-    Log.Info("Initializing ConfigManager..")
+    Log.Info("Initializing ConfigManager")
 
     new File(configDir).listFiles(new FilenameFilter() {
       def accept(dir: File, name: String): Boolean = name.endsWith(configExt)
