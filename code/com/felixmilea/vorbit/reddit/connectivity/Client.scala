@@ -1,25 +1,25 @@
 package com.felixmilea.vorbit.reddit.connectivity
 
-import com.felixmilea.vorbit.managers.SessionManager
 import com.felixmilea.vorbit.JSON.JSONParser
 import com.felixmilea.vorbit.utils.Log
 import scala.util.parsing.json.JSONArray
 import com.felixmilea.vorbit.JSON.JSONTraverser
 import com.felixmilea.vorbit.JSON.JSONTraverser
+import com.felixmilea.vorbit.data.RedditUserManager
 
 class Client {
   var session: Session = null
 
   def isAuthenticated = session != null && !session.isExpired
 
-  def authenticate(cred: Credential): Boolean = SessionManager.findSession(cred.username) match {
+  def authenticate(user: RedditUser): Boolean = RedditUserManager.getSession(user.credential.username) match {
     case Some(sess) =>
       session = sess
       return true
     case None =>
       val params = new ConnectionParameters
 
-      params ++= Seq(("user" -> cred.username), ("passwd" -> cred.password), ("rem" -> "true"))
+      params ++= Seq(("user" -> user.credential.username), ("passwd" -> user.credential.password), ("rem" -> "true"))
 
       val conn = new Connection(Nodes.login, params, true)
       val json = JSONParser.parse(conn.response)("json")
@@ -29,9 +29,10 @@ class Client {
 
       if (success) {
         session = Session.parse(conn, json("data"))
-        SessionManager.addSession(cred.username, session)
+        user.session = session
+        RedditUserManager.persist(user)
       } else
-        clientError(s"VorbitBot authentication failed for client with username `${cred.username}`", errors)
+        clientError(s"VorbitBot authentication failed for client with username `${user.credential.username}`", errors)
 
       return success
   }

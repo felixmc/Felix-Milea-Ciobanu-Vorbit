@@ -9,8 +9,8 @@ import com.felixmilea.vorbit.utils.Log
 object EntityManager {
 
   def insertPost(post: RedditPost, table: String): Boolean = {
-    val conn = mkConn()
-    val ps = conn.prepareStatement(s"INSERT INTO `mined_data_$table`(`reddit_id`, `parent`, `type`, `author`, `subreddit`, `title`, `content`, `children_count`, `ups`, `downs`, `gilded`, `miner`, `date_posted`, `date_mined`) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
+    val db = getDB()
+    val ps = db.conn.prepareStatement(s"INSERT INTO `mined_data_$table`(`reddit_id`, `parent`, `type`, `author`, `subreddit`, `title`, `content`, `children_count`, `ups`, `downs`, `gilded`, `miner`, `date_posted`, `date_mined`) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
 
     val isComment = post.isInstanceOf[Comment]
 
@@ -33,14 +33,14 @@ object EntityManager {
 
     try {
       ps.executeUpdate()
-      conn.commit()
+      db.conn.commit()
     } catch {
       case t: Throwable => {
         Log.Warning(s"\t\tAttempted to insert already existing post with id `${post.redditId}`")
         success = false
       }
     }
-    conn.close()
+    db.conn.close()
     return success
   }
 
@@ -52,7 +52,16 @@ object EntityManager {
     true
   }
 
-  private def mkConn(): DBConnection = {
+  def setupMiner(name: String) {
+    val db = getDB()
+    val cs = db.conn.prepareCall("call setup_miner(?)")
+    cs.setString(1, name)
+    cs.executeUpdate()
+    db.conn.commit()
+    db.conn.close()
+  }
+
+  private def getDB(): DBConnection = {
     val conn = new DBConnection
     conn.connect
     return conn

@@ -5,11 +5,9 @@ import java.text.SimpleDateFormat
 import com.felixmilea.vorbit.JSON.JSONTraverser
 import com.felixmilea.vorbit.JSON.JSONParser
 
-class Session(_modhash: String, _cookie: String, _expiration: Date) {
-  val modhash = _modhash
-  val cookie = _cookie
-  val expiration = _expiration
-  def isExpired = new Date().after(expiration)
+class Session(val modhash: String, val cookie: String, val expiration: Date) {
+  def isExpired = expiration == null || new Date().after(expiration)
+  def isValid = modhash != null && cookie != null && !isExpired
 }
 
 object Session {

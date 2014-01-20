@@ -3,7 +3,6 @@ package com.felixmilea.vorbit.main
 import com.felixmilea.vorbit.utils.Log
 import com.felixmilea.vorbit.utils.ConfigManager
 import com.felixmilea.vorbit.utils.Initable
-import com.felixmilea.vorbit.data.Setup
 import com.felixmilea.scala.console.ConsoleMenuApp
 import com.felixmilea.scala.console.MenuItem
 import com.felixmilea.scala.console.ConsoleMenu
@@ -18,7 +17,7 @@ object Vorbit extends ConsoleMenuApp {
   override def start() {
     Log.init()
     Log.Info("Vorbit started.")
-    Seq[Initable](ConfigManager, Setup).foreach { _.init }
+    Seq[Initable](ConfigManager).foreach { _.init }
 
     setupMenu()
 
@@ -40,7 +39,7 @@ object Vorbit extends ConsoleMenuApp {
     for (i <- 0 until ConfigManager("miners")(JSONParser.L).get.length) {
       val minerConfig = MinerConfig.parse(ConfigManager("miners")(i))
       mm.addItem(new MenuItem(minerConfig.name, () => {
-        val miner = new Miner(minerConfig, 200)
+        val miner = new Miner(minerConfig)
         miner.start()
         println("Press enter to stop miner..")
         Console.readLine()

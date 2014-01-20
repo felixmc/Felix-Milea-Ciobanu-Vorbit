@@ -7,5 +7,4 @@ abstract class RedditPost(redditId: String, val author: String, val subreddit: S
   extends RedditThing(redditId) {
 
   def karma = ups - downs
-
 }

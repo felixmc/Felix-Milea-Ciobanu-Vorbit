@@ -9,14 +9,17 @@ import com.mysql.jdbc.Driver
 import java.sql.ResultSet
 import java.sql.PreparedStatement
 import java.sql.DriverManager
+import java.sql.CallableStatement
 
 class DBConnection {
   private val protocol = "jdbc:mysql://"
 
-  private var conn: Connection = null
+  private var connection: Connection = null
   private var statement: Statement = null
   private var preparedStatement: PreparedStatement = null
   private var resultSet: ResultSet = null
+
+  def conn = connection
 
   def connect() {
     val props = new Properties()
@@ -24,11 +27,10 @@ class DBConnection {
     props.setProperty("password", DBConfig("password"))
 
     Class.forName("com.mysql.jdbc.Driver")
-    conn = DriverManager.getConnection(s"$protocol${DBConfig("host")}:3306/${DBConfig("database")}", props)
+    connection = DriverManager.getConnection(s"$protocol${DBConfig("host")}:3306/${DBConfig("database")}", props)
 
-    conn.setAutoCommit(false)
-    statement = conn.createStatement
-    //    preparedStatement = conn.create
+    connection.setAutoCommit(false)
+    statement = connection.createStatement
   }
 
   def executeQuery(query: String): ResultSet = {
@@ -38,16 +40,6 @@ class DBConnection {
     } else {
       return statement.executeQuery(query)
     }
-  }
-
-  def prepareStatement(query: String): PreparedStatement = conn.prepareStatement(query)
-
-  def commit() {
-    conn.commit()
-  }
-
-  def close() {
-    conn.close();
   }
 
 }
