@@ -13,6 +13,7 @@ import com.felixmilea.vorbit.data.RedditUserManager
 import com.felixmilea.vorbit.utils.Log
 import com.felixmilea.vorbit.reddit.connectivity.RedditUser
 import com.felixmilea.vorbit.reddit.connectivity.Session
+import com.felixmilea.vorbit.data.DBConfig
 
 object MinerTest extends App {
 

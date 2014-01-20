@@ -14,7 +14,8 @@ object RedditUserManager extends Initable {
   private var insertStatement: PreparedStatement = null
   private var updateStatement: PreparedStatement = null
 
-  def init() {
+  val dependencies = Seq(DBConfig)
+  def doInit() {
     db = new DBConnection()
     db.connect
 

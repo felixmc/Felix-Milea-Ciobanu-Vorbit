@@ -23,9 +23,10 @@ object Log extends Initable {
     new File("appdata/logs.bob.log").createNewFile()
   }
 
-  def init() {
-    val socket = new Socket(LogServer.HOSTNAME, LogServer.PORT)
-    out = new PrintStream(socket.getOutputStream(), true)
+  val dependencies = Seq()
+  def doInit() {
+    //    val socket = new Socket(LogServer.HOSTNAME, LogServer.PORT)
+    //    out = new PrintStream(socket.getOutputStream(), true)
   }
 
   private def timestamp = timeFormat.format(new Date)

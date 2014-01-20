@@ -15,7 +15,8 @@ object ConfigManager extends Initable {
   private val configValues = new HashMap[String, JSONTraverser]()
   private val configs = Seq[Initable](DBConfig)
 
-  def init() {
+  val dependencies = Seq()
+  def doInit() {
     Log.Info("Initializing ConfigManager")
 
     new File(configDir).listFiles(new FilenameFilter() {
@@ -31,10 +32,11 @@ object ConfigManager extends Initable {
         case None => Log.Warning(s"\t- Could not parse config file `$file`")
       }
     })
+  }
 
+  override def postInit() {
     configs.foreach { _.init }
   }
 
   def apply(config: String): JSONTraverser = configValues.getOrElse(config, new JSONTraverser(None))
-
 }

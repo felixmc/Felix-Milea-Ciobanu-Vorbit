@@ -5,8 +5,14 @@ import com.felixmilea.vorbit.reddit.models.Comment
 import com.felixmilea.vorbit.reddit.models.Post
 import com.mysql.jdbc.exceptions.MySQLIntegrityConstraintViolationException
 import com.felixmilea.vorbit.utils.Log
+import com.felixmilea.vorbit.utils.Initable
 
-object EntityManager {
+object EntityManager extends Initable {
+
+  val dependencies = Seq(DBConfig)
+  def doInit() {
+    // setup db if not already setup
+  }
 
   def insertPost(post: RedditPost, table: String): Boolean = {
     val db = getDB()

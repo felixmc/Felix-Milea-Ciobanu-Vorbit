@@ -10,7 +10,8 @@ object DBConfig extends Initable {
 
   def apply(property: String) = data.getOrElse(property, "")
 
-  def init() {
+  val dependencies = Seq(ConfigManager)
+  def doInit() {
     val propNames = Seq("host", "database", "username", "password", "mined_data_table_prefix")
     val props = ArrayBuffer[(String, String)]()
 
