@@ -2,14 +2,14 @@ package com.felixmilea.vorbit.utils
 
 trait Initable {
   protected val dependencies: Seq[Initable]
-  private var isInited = false
+  private var isInitDone = false
 
-  final def isInit = isInited
+  final def isInited = isInitDone
 
   final def init() {
     dependencies.foreach(i => if (!i.isInited) throw new InitDependencyException(this, i))
     doInit()
-    isInited = true
+    isInitDone = true
     postInit()
   }
 

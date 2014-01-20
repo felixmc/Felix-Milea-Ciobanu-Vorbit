@@ -18,19 +18,10 @@ import com.felixmilea.vorbit.data.DBConfig
 object MinerTest extends App {
 
   ConfigManager.init
-  RedditUserManager.init
-
-  //  val username = "horsemanboy"
-
-  //  RedditUserManager.getUser(username) match {
-  //    case None => Log.Error(s"User $username not found.")
-  //    case Some(u) => Log.Info(s"User found > ${u.credential}")
-  //  }
+  //  RedditUserManager.init
 
   val mineConfig = MinerConfig.parse(ConfigManager("miners")(0))
-  //
   val miner = new Miner(mineConfig)
-  //
   miner.start()
 
   //  val user = new RedditUser(new Credential("", ""), new Session(null, null, null))

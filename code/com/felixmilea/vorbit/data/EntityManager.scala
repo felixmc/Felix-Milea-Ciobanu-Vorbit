@@ -16,7 +16,7 @@ object EntityManager extends Initable {
 
   def insertPost(post: RedditPost, table: String): Boolean = {
     val db = getDB()
-    val ps = db.conn.prepareStatement(s"INSERT INTO `mined_data_$table`(`reddit_id`, `parent`, `type`, `author`, `subreddit`, `title`, `content`, `children_count`, `ups`, `downs`, `gilded`, `miner`, `date_posted`, `date_mined`) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
+    val ps = db.conn.prepareStatement(s"INSERT INTO `mdt_${table}_a1`(`reddit_id`, `parent`, `type`, `author`, `subreddit`, `title`, `content`, `children_count`, `ups`, `downs`, `gilded`, `miner`, `date_posted`, `date_mined`) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
 
     val isComment = post.isInstanceOf[Comment]
 
