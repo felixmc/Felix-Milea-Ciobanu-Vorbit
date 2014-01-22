@@ -19,8 +19,8 @@ class SubredditMiner(config: MinerConfig) extends MiningEngine(config) {
         val postNode = posts(postIndex)("data")
         val post = ModelParser.parse(ModelParser.T3)(postNode)
         if (isValidPost(post)) {
-          if (EntityManager.insertPost(post, config.name))
-            Log.Debug(s"\t\tMining post `${post.redditId}` ngrams found: ${WordParser.parseAsText(post.title)}")
+          if (EntityManager.persistPost(post, config.name))
+            logMined(post)
 
           val commentJson = new JSONTraverser(Option(JSON.parseFull(client.get(commentsUrl(post.redditId))).get.asInstanceOf[AnyRef]))
           val commentNode = commentJson(1)("data")("children")
@@ -29,8 +29,8 @@ class SubredditMiner(config: MinerConfig) extends MiningEngine(config) {
             if (commentNode(comIndex)("kind")().get == "t1") {
               val comment = ModelParser.parse(ModelParser.T1)(commentNode(comIndex)("data"))
               if (isValidComment(comment)) {
-                if (EntityManager.insertPost(comment, config.name))
-                  Log.Debug(s"\t\tMinining comment `${comment.redditId}` on thread `${post.redditId}` ngrams found: ${WordParser.parseAsText(comment.content)}")
+                if (EntityManager.persistPost(comment, config.name))
+                  logMined(comment)
               }
             }
           }

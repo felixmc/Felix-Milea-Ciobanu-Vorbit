@@ -11,13 +11,15 @@ import java.sql.PreparedStatement
 import java.sql.DriverManager
 import java.sql.CallableStatement
 
-class DBConnection {
+class DBConnection(autoConnect: Boolean = false) {
   private val protocol = "jdbc:mysql://"
 
   private var connection: Connection = null
   private var statement: Statement = null
   private var preparedStatement: PreparedStatement = null
   private var resultSet: ResultSet = null
+
+  if (autoConnect) connect()
 
   def conn = connection
 
@@ -33,13 +35,7 @@ class DBConnection {
     statement = connection.createStatement
   }
 
-  def executeQuery(query: String): ResultSet = {
-    if (statement == null) {
-      Log.Error(s"Cannot execute the following query because no database connection was found: `$query`")
-      return null
-    } else {
-      return statement.executeQuery(query)
-    }
-  }
+  def executeQuery(query: String): ResultSet = statement.executeQuery(query)
+  def execute(query: String): Boolean = statement.execute(query)
 
 }

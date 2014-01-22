@@ -5,6 +5,8 @@ import com.felixmilea.vorbit.reddit.models.Post
 import com.felixmilea.vorbit.reddit.models.Comment
 import java.util.Date
 import com.felixmilea.vorbit.utils.Log
+import com.felixmilea.vorbit.reddit.models.RedditPost
+import com.felixmilea.vorbit.analysis.WordParser
 
 abstract class MiningEngine(protected val config: MinerConfig) {
   protected val client = new Client
@@ -29,6 +31,11 @@ abstract class MiningEngine(protected val config: MinerConfig) {
     }
 
     return true
+  }
+
+  def logMined(post: RedditPost) {
+    val content = (if (post.isInstanceOf[Post]) post.asInstanceOf[Post].title + " " else "") + post.content
+    Log.Debug(s"\tMined post `$post` | ngrams parsed: ${WordParser.parseAsText(content)}")
   }
 
   def subredditUrl(name: String): String = {
