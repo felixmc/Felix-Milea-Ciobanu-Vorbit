@@ -12,6 +12,7 @@ import com.felixmilea.vorbit.data.EntityManager
 import com.felixmilea.vorbit.analysis.WordParser
 import com.felixmilea.vorbit.utils.Log
 import java.util.Date
+import com.felixmilea.scala.profiling.FunctionTimer
 
 class Miner(private val config: MinerConfig) extends Thread {
   private val DELAY = (1000 * 60) * 5
@@ -20,10 +21,12 @@ class Miner(private val config: MinerConfig) extends Thread {
   EntityManager.setupMiner(config.name)
 
   override def run() {
+    val ft = new FunctionTimer
     while (true) {
       Log.Info(s"Starting data mining operation `${config.name}`")
-      engine.mine
-      Log.Info(s"Pausing data mining operation `${config.name}` for $DELAY ms")
+      ft { engine.mine }
+      Log.Info(s"Data mining operation `${config.name}` completed in ${ft.elapsedTime} ms")
+      Log.Info(s"Resuming data mining operation `${config.name}` in $DELAY ms")
       Thread.sleep(DELAY)
     }
   }

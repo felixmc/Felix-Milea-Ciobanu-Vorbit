@@ -12,7 +12,7 @@ class Connection(uri: String, params: ConnectionParameters = new ConnectionParam
   import ConnectionUtils._
 
   private val data = params.toString
-  private val query = if (!isPost && !data.isEmpty) s"?$data" else ""
+  private val query = if (!isPost && !data.isEmpty) if (uri.contains('?')) s"&$data" else s"?$data" else ""
   private val conn = URL(uri + query).openConnection().asInstanceOf[HttpURLConnection]
   private var resp: String = null
 
