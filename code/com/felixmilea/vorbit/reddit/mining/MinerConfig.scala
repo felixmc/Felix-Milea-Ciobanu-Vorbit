@@ -13,7 +13,8 @@ class MinerConfig(
   val postConstraints: List[MinerConfig.PostConstraints],
   val commentConstraints: List[MinerConfig.CommentConstraints],
   val commentSort: String = "top",
-  val commentNestingLevel: Int = 0)
+  val commentNestingLevel: Int = 0,
+  val pages: Int = 5)
 
 object MinerConfig {
   class PostConstraints(

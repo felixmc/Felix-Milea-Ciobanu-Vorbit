@@ -46,7 +46,8 @@ object ModelParser {
         new Post(redditId = json("id")().get, author = json("author")().get, subreddit = json("subreddit")().get,
           title = json("title")().get, content = json("selftext")().get, ups = json("ups")(JSONParser.I).get,
           downs = json("downs")(JSONParser.I).get, children_count = json("num_comments")(JSONParser.I).get,
-          date_posted = new Date(json("created")(JSONParser.D).get.toLong * 1000))
+          date_posted = new Date(json("created")(JSONParser.D).get.toLong * 1000),
+          postType = if (json("is_self")(JSONParser.B).get) "self" else "link")
       } catch {
         case nse: NoSuchElementException => {
           throw new RedditPostParseException(json)
