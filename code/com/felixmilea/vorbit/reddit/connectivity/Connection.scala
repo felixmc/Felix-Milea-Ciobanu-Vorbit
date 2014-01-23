@@ -13,7 +13,9 @@ class Connection(uri: String, params: ConnectionParameters = new ConnectionParam
 
   private val data = params.toString
   private val query = if (!isPost && !data.isEmpty) if (uri.contains('?')) s"&$data" else s"?$data" else ""
-  private val conn = URL(uri + query).openConnection().asInstanceOf[HttpURLConnection]
+
+  private val conn: HttpURLConnection = URL(uri + query).openConnection().asInstanceOf[HttpURLConnection]
+
   private var resp: String = null
 
   headers.foreach(h => conn.setRequestProperty(h._1, h._2))
@@ -34,7 +36,6 @@ class Connection(uri: String, params: ConnectionParameters = new ConnectionParam
       writeData()
     } catch {
       case ioe: IOException => Log.Error("VorbitBot encountered an error while writing data to connection: " + ioe)
-      case uhe: UnknownHostException => Log.Error("VorbitBot encountered an error while connecting to host: " + uhe)
     }
   }
 

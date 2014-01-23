@@ -2,6 +2,7 @@ package com.felixmilea.vorbit.JSON
 
 import scala.util.parsing.json.JSONArray
 import scala.util.parsing.json.JSONObject
+import com.felixmilea.vorbit.utils.Log
 
 class JSONTraverser(val data: Option[AnyRef]) {
 

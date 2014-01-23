@@ -6,6 +6,7 @@ import scala.util.parsing.json.JSONArray
 import com.felixmilea.vorbit.JSON.JSONTraverser
 import com.felixmilea.vorbit.JSON.JSONTraverser
 import com.felixmilea.vorbit.data.RedditUserManager
+import java.net.UnknownHostException
 
 class Client {
   var session: Session = null
@@ -21,7 +22,14 @@ class Client {
 
       params ++= Seq(("user" -> user.credential.username), ("passwd" -> user.credential.password), ("rem" -> "true"))
 
-      val conn = new Connection(Nodes.login, params, true)
+      val conn = try {
+        new Connection(Nodes.login, params, true)
+      } catch {
+        case uhe: UnknownHostException =>
+          Log.Error("VorbitBot encountered an error while connecting to host: " + uhe)
+          null
+      }
+
       val json = JSONParser.parse(conn.response)("json")
 
       val errors = json("errors")
@@ -46,7 +54,15 @@ class Client {
 
   private def createConn(path: String): Connection = {
     val sessionHeaders = if (session != null) Map(("X-Modhash", session.modhash), ("Cookie", s"reddit_session=${session.cookie}")) else Map[String, String]()
-    return new Connection(path, headers = sessionHeaders)
+
+    try {
+      new Connection(path, headers = sessionHeaders)
+    } catch {
+      case uhe: UnknownHostException =>
+        Log.Error("VorbitBot encountered an error while connecting to host: " + uhe)
+        null
+    }
+
   }
 
   def clientError(header: String, errors: JSONTraverser) {
