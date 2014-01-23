@@ -61,8 +61,8 @@ abstract class MiningEngine(protected val config: MinerConfig) {
     Log.Debug(s"\tMined post `$post` | ngrams parsed: ${WordParser.parseAsText(content)}")
   }
 
-  def subredditUrl(name: String): String = {
-    val vars = if (!config.time.isEmpty) s"&t=${config.time}" else ""
+  def subredditUrl(name: String, after: String): String = {
+    val vars = (if (!config.time.isEmpty) s"&t=${config.time}" else "") + (if (after.isEmpty()) "" else s"&after=t3_$after")
     return s"r/$name/${config.postSort}/.json?limit=100$vars"
   }
 
