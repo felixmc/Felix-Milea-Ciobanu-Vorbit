@@ -26,14 +26,11 @@ abstract class MiningEngine(protected val config: MinerConfig) {
         val comment = ModelParser.parse(ModelParser.T1)(commentsNode(comIndex)("data"))
         if (isValidComment(comment)) {
           if (EntityManager.persistPost(comment, config.name)) logMined(comment)
-          if (nesting >= 0 && !commentsNode(comIndex)("data")("replies")().get.isEmpty) {
-            //            Log.Info(s"Mining at nested level ${config.commentNestingLevel - (nesting - 1)} of post ${commentsNode(comIndex)("data")("id")().get} passing in data " + commentsNode(comIndex)("data")("replies"))
+          if (nesting >= 0 && !commentsNode(comIndex)("data")("replies")().get.isEmpty)
             mineThreadComments(commentsNode(comIndex)("data")("replies"), nesting - 1)
-          }
         }
       }
     }
-
   }
 
   protected def isValidPost(post: Post): Boolean = {
@@ -57,8 +54,8 @@ abstract class MiningEngine(protected val config: MinerConfig) {
   }
 
   def logMined(post: RedditPost) {
-    val content = (if (post.isInstanceOf[Post]) post.asInstanceOf[Post].title + " " else "") + post.content
-    Log.Debug(s"\tMined post `$post` | ngrams parsed: ${WordParser.parseAsText(content)}")
+    //    val content = (if (post.isInstanceOf[Post]) post.asInstanceOf[Post].title + " " else "") + post.content
+    //    Log.Debug(s"\tMined post `$post` | ngrams parsed: ${WordParser.parseAsText(content)}")
   }
 
   def subredditUrl(name: String, after: String): String = {
