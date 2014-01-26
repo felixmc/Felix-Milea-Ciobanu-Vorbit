@@ -18,7 +18,7 @@ object TextUnitParserConfig {
         ),
       escapedSequences = Vector(("&amp;" -> "&"), ("&gt;" -> ">"), ("&lt;" -> "<")),
       removePatterns = Vector(
-        "[\"*_]+", // quotes, formatting, and underscores
+        "[\"*]+", // quotes and formatting (bold/italics)
         "(~~(.)*?~~)", // strikethrough content
         "[~]{2}", // random double tildas
         "\\(\\w(.)*?\\)", // paranthesis content
@@ -30,6 +30,7 @@ object TextUnitParserConfig {
       wordSplitExceptions = Vector(
         (W("&") -> "and"),
         (W("-") -> "hyphen"),
+        (W("_") -> "underscore"),
         (BW("/") -> "slash"),
         (BD("\\$") -> "dollarSign"),
         (D(",") -> "numberComma"),

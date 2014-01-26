@@ -12,7 +12,7 @@ object Analyzer extends App {
   val posts = getPosts(postCount).map(p => p.content).filter(s => TextUnitParser.isGoodSource(s))
   val parser = new TextUnitParser
 
-  val post = "http://something.com/ dsafdsa\nhttps://asdf.net/?dsaf=sdfa "
+  val post = "http://something.com/ dsafdsa is a URL and so is https://asdf.net/?dsaf=sdfa "
 
   sep
 

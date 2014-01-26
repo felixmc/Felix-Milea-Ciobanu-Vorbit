@@ -39,8 +39,8 @@ class TextUnitParser(val config: TextUnitParserConfig = TextUnitParserConfig.get
 }
 
 object TextUnitParser {
-
   val urlPattern = Pattern.compile("(https?://.*?(?=\\s))")
+  val E = 'E' // escape character..use of uppercase is okay bc input text is always lowercased first
 
   def isGoodSource(text: String): Boolean = {
     return text != "[deleted]"
@@ -68,25 +68,36 @@ object TextUnitParser {
     def wordSplit(phrases: Seq[String], exceptions: Seq[((String, String), String)]): Seq[String] = {
       var output = s
 
-      // parse out urls
       val urls = new ArrayBuffer[String]
+
+      // match output against the url mattern
       val urlMatcher = urlPattern.matcher(output)
-      while (urlMatcher.find) {
-        urlMatcher.replaceFirst(s"_URL${urls.length}_")
-        urls += urlMatcher.group(1)
-      }
 
-      // replace spaces between phrases with _
-      for (p <- phrases) output = output.replaceAll(p, p.replaceAll(" ", "_"))
+      // parse out urls and store them
+      while (urlMatcher.find()) urls += urlMatcher.group(1)
 
-      // replace special characters with a caps word literal (to avoid collision with phrases), escaped with _'s
-      for (ex <- exceptions) output = output.replaceAll(ex._1._2, s"_${ex._2.toUpperCase}_")
+      // replace urls with placeholders
+      for (i <- 0 until urls.length) output = output.replaceAllLiterally(urls(i), s"${E}URL${i}${E}")
 
+      // replace special characters with an escaped caps word literal (to avoid collision with phrases)
+      for (ex <- exceptions) output = output.replaceAll(ex._1._2, s"$E${ex._2.toUpperCase}$E")
+
+      // replace spaces between phrases with escape char
+      for (p <- phrases) output = output.replaceAll(p, p.replaceAll(" ", s"$E"))
+
+      // split string on word breaks and then undo all the escaping
       output.split("\\b").map(n => {
         var output = n
 
         // replace word literals with symbols
-        for (ex <- exceptions) output = output.replaceAll(s"_${ex._2.toUpperCase}_", ex._1._1)
+        for (ex <- exceptions) output = output.replaceAll(s"${E}${ex._2.toUpperCase}${E}", ex._1._1)
+
+        // replace URL placeholders back with actual urls
+        for (i <- 0 until urls.length) output = output.replaceAllLiterally(s"${E}URL${i}$E", urls(i))
+
+        // replace escape char with space in phrases
+        for (p <- phrases) output = output.replaceAll(p, p.replaceAll(s"$E", " "))
+
         output
       })
     }
