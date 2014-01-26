@@ -30,6 +30,8 @@ class TextUnitParser(val config: TextUnitParserConfig = TextUnitParserConfig.get
 
       // apply to all ngrams..
       .map(n => n
+        // replace new line with place holder
+        .replaceAll("\n", "NL")
         // remove whitespace
         .replaceAll("[\\s]+", ""))
 
@@ -86,7 +88,7 @@ object TextUnitParser {
       for (p <- phrases) output = output.replaceAll(p, p.replaceAll(" ", s"$E"))
 
       // split string on word breaks and then undo all the escaping
-      output.split("\\b").map(n => {
+      output.split("\\b|\\B(?=\n)").map(n => {
         var output = n
 
         // replace word literals with symbols

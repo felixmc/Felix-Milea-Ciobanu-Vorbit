@@ -12,18 +12,16 @@ object TextUnitParserConfig {
   def getDefault(): TextUnitParserConfig = {
     return new TextUnitParserConfig(
       normalizations = Vector((" vs." -> " vs "), (" u.s." -> " united states"), ("police man" -> "policeman"), // general word corrections
-        ("' " -> " "), //apostrophes at the end of things or by themselves
         ("\t" -> ""), // remove tabs (necessary for next one)
-        ("\\s{2,}" -> "NEWLINE") // two or more whitespace characters as a new line
+        ("\\s{2,}" -> "\n") // two or more whitespace characters as a new line placeholder
         ),
       escapedSequences = Vector(("&amp;" -> "&"), ("&gt;" -> ">"), ("&lt;" -> "<")),
       removePatterns = Vector(
         "[\"*]+", // quotes and formatting (bold/italics)
         "(~~(.)*?~~)", // strikethrough content
-        "[~]{2}", // random double tildas
         "\\(\\w(.)*?\\)", // paranthesis content
         "\\[(.)*?\\]", // bracketed content
-        ">(.)*?\\s{2}", // quoted content
+        ">(.)*?\n", // quoted content
         "(?<=\\s|^)\\d\\)" // numbered list e.g. 1) 2)
         ),
       phrases = Vector("united states"),

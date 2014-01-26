@@ -12,22 +12,11 @@ object Analyzer extends App {
   val posts = getPosts(postCount).map(p => p.content).filter(s => TextUnitParser.isGoodSource(s))
   val parser = new TextUnitParser
 
-  val post = "http://something.com/ dsafdsa is a URL and so is https://asdf.net/?dsaf=sdfa "
+  for (post <- posts) {
+    val ngrams = parser.parse(post)
 
-  sep
-
-  Log.Info(post)
-
-  sep
-
-  printNgrams(parser.parse(post))
-
-  //  for (post <- posts) {
-  //    val ngrams = parser.parse(post)
-  //
-  //    println(s"$post")
-  //
-  //  }
+    printNgrams(ngrams)
+  }
 
   def sep = Log.Warning("=" * 180)
 
