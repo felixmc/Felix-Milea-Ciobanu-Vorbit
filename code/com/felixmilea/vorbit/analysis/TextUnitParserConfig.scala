@@ -11,14 +11,26 @@ object TextUnitParserConfig {
 
   def getDefault(): TextUnitParserConfig = {
     return new TextUnitParserConfig(
-      normalizations = Vector((" vs." -> " vs "), (" u.s." -> " united states"), ("police man" -> "policeman"), ("' " -> " ")),
-      escapedSequences = Vector(("&amp;" -> "&"), ("&gt;" -> ">"), ("&lt;" -> "<&")),
-      removePatterns = Vector("[\"*_]+", "(~~(.)*?~~)", "[~]{2}", "\\(\\w(.)*?\\)", "\\[(.)*?\\]", "\\> (.)*?\\s{2}"),
+      normalizations = Vector((" vs." -> " vs "), (" u.s." -> " united states"), ("police man" -> "policeman"), // general word corrections
+        ("' " -> " "), //apostrophes at the end of things or by themselves
+        ("\t" -> ""), // remove tabs (necessary for next one)
+        ("\\s{2,}" -> "NEWLINE") // two or more whitespace characters as a new line
+        ),
+      escapedSequences = Vector(("&amp;" -> "&"), ("&gt;" -> ">"), ("&lt;" -> "<")),
+      removePatterns = Vector(
+        "[\"*_]+", // quotes, formatting, and underscores
+        "(~~(.)*?~~)", // strikethrough content
+        "[~]{2}", // random double tildas
+        "\\(\\w(.)*?\\)", // paranthesis content
+        "\\[(.)*?\\]", // bracketed content
+        ">(.)*?\\s{2}", // quoted content
+        "(?<=\\s|^)\\d\\)" // numbered list e.g. 1) 2)
+        ),
       phrases = Vector("united states"),
       wordSplitExceptions = Vector(
         (W("&") -> "and"),
         (W("-") -> "hyphen"),
-        (W("/") -> "slash"),
+        (BW("/") -> "slash"),
         (BD("\\$") -> "dollarSign"),
         (D(",") -> "numberComma"),
         (W("'") -> "apostrophe")))

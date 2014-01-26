@@ -12,8 +12,26 @@ object Analyzer extends App {
   val posts = getPosts(postCount).map(p => p.content).filter(s => TextUnitParser.isGoodSource(s))
   val parser = new TextUnitParser
 
-  for (post <- posts) {
-    val ngrams = parser.parse(post)
+  val post = "http://something.com/ dsafdsa\nhttps://asdf.net/?dsaf=sdfa "
+
+  sep
+
+  Log.Info(post)
+
+  sep
+
+  printNgrams(parser.parse(post))
+
+  //  for (post <- posts) {
+  //    val ngrams = parser.parse(post)
+  //
+  //    println(s"$post")
+  //
+  //  }
+
+  def sep = Log.Warning("=" * 180)
+
+  def printNgrams(ngrams: Seq[String]) {
     val sb = new StringBuilder
 
     for (i <- 0 until ngrams.length) {
@@ -28,7 +46,7 @@ object Analyzer extends App {
     if (!sb.isEmpty)
       Log.Info(sb.mkString)
 
-    Log.Info("=" * 180)
+    sep
   }
 
   def getPosts(count: Int = 100): Vector[Comment] = {

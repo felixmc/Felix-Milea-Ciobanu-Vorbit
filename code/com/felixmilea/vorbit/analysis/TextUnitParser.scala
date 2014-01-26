@@ -1,5 +1,9 @@
 package com.felixmilea.vorbit.analysis
 
+import scala.collection.mutable.ArrayBuffer
+import java.util.regex.Pattern
+import com.felixmilea.vorbit.utils.Log
+
 class TextUnitParser(val config: TextUnitParserConfig = TextUnitParserConfig.getDefault) {
   import TextUnitParser._
 
@@ -36,6 +40,8 @@ class TextUnitParser(val config: TextUnitParserConfig = TextUnitParserConfig.get
 
 object TextUnitParser {
 
+  val urlPattern = Pattern.compile("(https?://.*?(?=\\s))")
+
   def isGoodSource(text: String): Boolean = {
     return text != "[deleted]"
   }
@@ -61,6 +67,14 @@ object TextUnitParser {
 
     def wordSplit(phrases: Seq[String], exceptions: Seq[((String, String), String)]): Seq[String] = {
       var output = s
+
+      // parse out urls
+      val urls = new ArrayBuffer[String]
+      val urlMatcher = urlPattern.matcher(output)
+      while (urlMatcher.find) {
+        urlMatcher.replaceFirst(s"_URL${urls.length}_")
+        urls += urlMatcher.group(1)
+      }
 
       // replace spaces between phrases with _
       for (p <- phrases) output = output.replaceAll(p, p.replaceAll(" ", "_"))
