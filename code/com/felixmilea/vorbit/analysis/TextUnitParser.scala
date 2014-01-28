@@ -45,7 +45,7 @@ object TextUnitParser {
   val E = 'E' // escape character..use of uppercase is okay bc input text is always lowercased first
 
   def isGoodSource(text: String): Boolean = {
-    return text != "[deleted]"
+    return text != "[deleted]" && !(text.contains("&gt;") && text.toLowerCase.contains("ftfy"))
   }
 
   implicit class NgramString(s: String) {
@@ -87,7 +87,7 @@ object TextUnitParser {
       // replace spaces between phrases with escape char
       for (p <- phrases) output = output.replaceAll(p, p.replaceAll(" ", s"$E"))
 
-      // split string on word breaks and then undo all the escaping
+      // split string on word breaks or a non-word break succeeded by a new line
       output.split("\\b|\\B(?=\n)").map(n => {
         var output = n
 

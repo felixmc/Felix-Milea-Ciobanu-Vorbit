@@ -4,7 +4,6 @@ import java.util.Date
 
 import com.felixmilea.vorbit.JSON.JSONParser
 import com.felixmilea.vorbit.JSON.JSONTraverser
-import com.felixmilea.vorbit.analysis.WordParser
 import com.felixmilea.vorbit.data.EntityManager
 import com.felixmilea.vorbit.reddit.connectivity.Client
 import com.felixmilea.vorbit.reddit.models.Comment
