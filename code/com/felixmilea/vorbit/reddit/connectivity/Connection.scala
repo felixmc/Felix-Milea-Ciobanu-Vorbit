@@ -5,10 +5,11 @@ import java.io.OutputStreamWriter
 import java.net.HttpURLConnection
 import java.io.BufferedReader
 import java.io.InputStreamReader
-import com.felixmilea.vorbit.utils.Log
 import java.net.UnknownHostException
+import com.felixmilea.vorbit.utils.Loggable
 
-class Connection(uri: String, params: ConnectionParameters = new ConnectionParameters(), isPost: Boolean = false, headers: Map[String, String] = Map()) {
+class Connection(uri: String, params: ConnectionParameters = new ConnectionParameters(), isPost: Boolean = false, headers: Map[String, String] = Map())
+  extends Loggable {
   import ConnectionUtils._
 
   private val data = params.toString
@@ -35,7 +36,7 @@ class Connection(uri: String, params: ConnectionParameters = new ConnectionParam
     try {
       writeData()
     } catch {
-      case ioe: IOException => Log.Error("VorbitBot encountered an error while writing data to connection: " + ioe)
+      case ioe: IOException => Error("VorbitBot encountered an error while writing data to connection: " + ioe)
     }
   }
 

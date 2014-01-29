@@ -5,8 +5,9 @@ import com.felixmilea.vorbit.utils.ConfigManager
 import com.felixmilea.vorbit.reddit.models.Comment
 import scala.collection.mutable.ArrayBuffer
 import com.felixmilea.vorbit.utils.Log
+import com.felixmilea.vorbit.utils.Loggable
 
-object Analyzer extends App {
+object Analyzer extends App with Loggable {
   ConfigManager.init
   val postCount = 20
   val posts = getPosts(postCount).map(p => p.content).filter(s => TextUnitParser.isGoodSource(s))
@@ -14,11 +15,10 @@ object Analyzer extends App {
 
   for (post <- posts) {
     val ngrams = parser.parse(post)
-
     printNgrams(ngrams)
   }
 
-  def sep = Log.Warning("=" * 180)
+  def sep = Warning("=" * 180)
 
   def printNgrams(ngrams: Seq[String]) {
     val sb = new StringBuilder
@@ -27,13 +27,13 @@ object Analyzer extends App {
       //      sb ++= s"[${Console.WHITE}${ngrams(i)}${Console.CYAN}] "
       sb ++= s"[${ngrams(i)}] "
       if ((i + 1) % 20 == 0) {
-        Log.Info(sb.mkString)
+        Info(sb.mkString)
         sb.clear
       }
     }
 
     if (!sb.isEmpty)
-      Log.Info(sb.mkString)
+      Info(sb.mkString)
 
     sep
   }

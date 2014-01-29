@@ -1,7 +1,6 @@
 package com.felixmilea.vorbit.reddit.mining
 
 import java.util.Date
-
 import com.felixmilea.vorbit.JSON.JSONParser
 import com.felixmilea.vorbit.JSON.JSONTraverser
 import com.felixmilea.vorbit.data.EntityManager
@@ -10,9 +9,9 @@ import com.felixmilea.vorbit.reddit.models.Comment
 import com.felixmilea.vorbit.reddit.models.ModelParser
 import com.felixmilea.vorbit.reddit.models.Post
 import com.felixmilea.vorbit.reddit.models.RedditPost
-import com.felixmilea.vorbit.utils.Log
+import com.felixmilea.vorbit.utils.Loggable
 
-abstract class MiningEngine(protected val config: MinerConfig) {
+abstract class MiningEngine(protected val config: MinerConfig) extends Loggable {
   protected val client = new Client
 
   def mine()

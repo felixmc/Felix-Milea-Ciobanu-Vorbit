@@ -4,8 +4,9 @@ import com.felixmilea.vorbit.utils.Initable
 import scala.collection.mutable.ArrayBuffer
 import com.felixmilea.vorbit.utils.ConfigManager
 import com.felixmilea.vorbit.utils.Log
+import com.felixmilea.vorbit.utils.Loggable
 
-object DBConfig extends Initable {
+object DBConfig extends Initable with Loggable {
   private var data: Map[String, String] = Map()
 
   def apply(property: String) = data.getOrElse(property, "")
@@ -18,7 +19,7 @@ object DBConfig extends Initable {
     propNames.foreach(prop =>
       (ConfigManager("database")(prop)()) match {
         case Some(value) => props += prop -> value
-        case None => Log.Warning(s"Could not load database config property `$prop` from ConfigManager.")
+        case None => Warning(s"Could not load database config property `$prop` from ConfigManager.")
       })
 
     data = props.toMap

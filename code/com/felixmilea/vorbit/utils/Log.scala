@@ -1,33 +1,21 @@
 package com.felixmilea.vorbit.utils
 
-import java.util.Date
-import java.text.SimpleDateFormat
+import java.io.PrintStream
 import java.io.FileWriter
 import java.io.File
-import java.net.Socket
-import java.io.PrintStream
+import java.text.SimpleDateFormat
+import java.util.Date
+import akka.actor.Actor
 
-object Log extends Initable {
+class Log(val printLevel: Int = 0, val fileLevel: Int = 1, val out: PrintStream = System.out) extends Actor {
   private val datetimeFormat = new SimpleDateFormat("EEE MMM dd HH:mm:ss yyyy")
   private val timeFormat = new SimpleDateFormat("HH:mm:ss")
-  private val logFileFormat = "appdata/logs/%s.log"
-  private val messagePadding = 7
-  private var out = System.out
-  private var logFile: String = null
-  var printLevel = 0
-  var fileLevel = 1
+  private val logFile: String = String.format(Log.logFileFormat, datetime.replace(':', '.'))
 
-  // "constructor"
-  {
-    logFile = String.format(logFileFormat, datetime.replace(':', '.'))
-    new File("appdata/logs.bob.log").createNewFile()
-  }
+  // create log file
+  new File("appdata/logs.bob.log").createNewFile()
 
-  val dependencies = Seq()
-  def doInit() {
-    //    val socket = new Socket(LogServer.HOSTNAME, LogServer.PORT)
-    //    out = new PrintStream(socket.getOutputStream(), true)
-  }
+  def this() = this(0, 1, System.out)
 
   private def timestamp = timeFormat.format(new Date)
   private def datetime = datetimeFormat.format(new Date)
@@ -39,20 +27,26 @@ object Log extends Initable {
     fw.close()
   }
 
-  protected abstract class Logger(val labelColor: String, val messageColor: String, val label: String, val level: Int) {
-    val padding = " " * (7 - label.length)
-    final def apply(message: String) {
-      if (printLevel <= level)
-        out.println(s"${Console.RESET}$labelColor $timestamp $padding$label ${Console.RESET}$messageColor $message${Console.RESET}")
-      if (fileLevel <= level)
-        printlnToFile(s"[$timestamp] $label:$padding $message")
+  def receive = {
+    case Loggable.Message(logger, message) => {
+      val padding = " " * (Log.messagePadding - logger.label.length)
+      if (printLevel <= logger.level)
+        out.println(s"${Console.RESET}${logger.labelColor} $timestamp $padding${logger.label} ${Console.RESET}${logger.messageColor} ${message}${Console.RESET}")
+      if (fileLevel <= logger.level)
+        printlnToFile(s"[$timestamp] ${logger.label}:$padding ${message}")
     }
   }
 
+}
+
+object Log {
+  var logFileFormat = "appdata/logs/%s.log"
+  var messagePadding = 7
+
+  abstract class Logger(val labelColor: String, val messageColor: String, val label: String, val level: Int)
   object Fatal extends Logger(Console.RED_B, Console.RED + Console.BOLD, "Fatal", 4)
   object Error extends Logger(Console.RED_B, Console.RED + Console.BOLD, "Error", 3)
   object Warning extends Logger(Console.YELLOW_B, Console.YELLOW + Console.BOLD, "Warning", 2)
   object Info extends Logger(Console.CYAN_B, Console.CYAN + Console.BOLD, "Info", 1)
   object Debug extends Logger(Console.GREEN_B, Console.GREEN + Console.BOLD, "Debug", 0)
-
 }

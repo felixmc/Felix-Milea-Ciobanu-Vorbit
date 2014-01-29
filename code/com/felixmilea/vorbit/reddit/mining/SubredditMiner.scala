@@ -15,7 +15,7 @@ class SubredditMiner(config: MinerConfig) extends MiningEngine(config) {
       for (curPage <- 0 to config.pages) {
         val posts = new JSONTraverser(Option(JSON.parseFull(client.get(subredditUrl(subreddit, after))).get.asInstanceOf[AnyRef]))("data")("children")
         val postsFound = posts(JSONParser.L).get.length
-        Log.Info(s"\tMining page $curPage of $subreddit/${config.postSort}: ${postsFound} threads found")
+        Info(s"\tMining page $curPage of $subreddit/${config.postSort}: ${postsFound} threads found")
         for (postIndex <- (0 until postsFound).par) {
           val postNode = posts(postIndex)("data")
           if (!postNode("stickied")(JSONParser.B).get) {

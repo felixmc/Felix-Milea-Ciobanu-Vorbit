@@ -7,8 +7,9 @@ import com.felixmilea.vorbit.JSON.JSONTraverser
 import com.felixmilea.vorbit.JSON.JSONTraverser
 import com.felixmilea.vorbit.data.RedditUserManager
 import java.net.UnknownHostException
+import com.felixmilea.vorbit.utils.Loggable
 
-class Client {
+class Client extends Loggable {
   var session: Session = null
 
   def isAuthenticated = session != null && !session.isExpired
@@ -26,7 +27,7 @@ class Client {
         new Connection(Nodes.login, params, true)
       } catch {
         case uhe: UnknownHostException =>
-          Log.Error("VorbitBot encountered an error while connecting to host: " + uhe)
+          Error("VorbitBot encountered an error while connecting to host: " + uhe)
           null
       }
 
@@ -59,17 +60,17 @@ class Client {
       new Connection(path, headers = sessionHeaders)
     } catch {
       case uhe: UnknownHostException =>
-        Log.Error("VorbitBot encountered an error while connecting to host: " + uhe)
+        Error("VorbitBot encountered an error while connecting to host: " + uhe)
         null
     }
 
   }
 
   def clientError(header: String, errors: JSONTraverser) {
-    Log.Error(s"$header:")
+    Error(s"$header:")
     for (errorIndex <- 0 until errors(JSONParser.L).get.length) {
       val err = errors(errorIndex)(JSONParser.L).get.asInstanceOf[List[String]]
-      Log.Error(s"\t- ${err(0)}: ${err(1)}")
+      Error(s"\t- ${err(0)}: ${err(1)}")
     }
   }
 }

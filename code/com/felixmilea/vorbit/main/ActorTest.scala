@@ -9,13 +9,15 @@ import com.felixmilea.vorbit.utils.Log
 import com.felixmilea.vorbit.data.DBConnection
 import com.felixmilea.vorbit.utils.ConfigManager
 import akka.routing.SmallestMailboxRouter
+import com.felixmilea.vorbit.utils.ApplicationUtils
+import com.felixmilea.vorbit.utils.Loggable
 
-object ActorTest extends App {
+object ActorTest extends App with Loggable {
   class Complex(val a: Int, val b: Int)
 
   ConfigManager.init
 
-  val system = ActorSystem("MySystem")
+  val system = ApplicationUtils.getActorSystem
 
   class PersistenceActor extends Actor {
     val db = new DBConnection(true)
@@ -33,7 +35,7 @@ object ActorTest extends App {
 
   val entityManager = system.actorOf(Props[PersistenceActor].withRouter(SmallestMailboxRouter(5)), "router")
 
-  Log.Info("start")
+  Info("start")
   for (i <- (0 to 9).par) {
     var count = 0
     while (count < 100) {
@@ -42,6 +44,6 @@ object ActorTest extends App {
       Thread.sleep(500)
     }
   }
-  Log.Info("end")
+  Info("end")
 
 }

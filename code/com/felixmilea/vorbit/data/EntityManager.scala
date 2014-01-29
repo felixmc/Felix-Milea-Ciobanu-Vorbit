@@ -7,8 +7,9 @@ import com.mysql.jdbc.exceptions.MySQLIntegrityConstraintViolationException
 import com.felixmilea.vorbit.utils.Log
 import com.felixmilea.vorbit.utils.Initable
 import java.sql.PreparedStatement
+import com.felixmilea.vorbit.utils.Loggable
 
-object EntityManager extends Initable {
+object EntityManager extends Initable with Loggable {
   val dependencies = Seq(DBConfig)
   def doInit() {
     // setup db if not already setup
@@ -28,7 +29,7 @@ object EntityManager extends Initable {
       db.conn.commit()
     } catch {
       case t: Throwable => {
-        Log.Error(s"\tA database error was encountered while attempting to store post `$post`")
+        Error(s"\tA database error was encountered while attempting to store post `$post`")
         success = false
       }
     } finally {
@@ -53,9 +54,8 @@ object EntityManager extends Initable {
     ps.setInt(9, post.ups)
     ps.setInt(10, post.downs)
     ps.setInt(11, if (isComment) post.asInstanceOf[Comment].gilded else 0)
-    ps.setInt(12, 1)
-    ps.setDate(13, new java.sql.Date(post.date_posted.getTime()))
-    ps.setDate(14, new java.sql.Date(new java.util.Date().getTime()))
+    ps.setDate(12, new java.sql.Date(post.date_posted.getTime()))
+    ps.setDate(13, new java.sql.Date(new java.util.Date().getTime()))
 
     return ps
   }
