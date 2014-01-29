@@ -1,15 +1,16 @@
 package com.felixmilea.vorbit.reddit.mining
 
 import com.felixmilea.scala.profiling.FunctionTimer
-import com.felixmilea.vorbit.data.EntityManager
 import com.felixmilea.vorbit.utils.Log
 import com.felixmilea.vorbit.utils.Loggable
+import akka.actor.ActorRef
+import com.felixmilea.vorbit.data.DataSetManager
 
-class Miner(private val config: MinerConfig) extends Thread with Loggable {
+class Miner(private val config: MinerConfig, dataManager: ActorRef) extends Thread with Loggable {
   private val DELAY = (1000 * 60) * 5
-  private val engine = MiningEngine.get(config)
+  private val engine = MiningEngine.get(config, dataManager)
 
-  EntityManager.setupMiner(config.name)
+  dataManager ! DataSetManager.SetupDataSet(config.name)
 
   override def run() {
     val ft = new FunctionTimer

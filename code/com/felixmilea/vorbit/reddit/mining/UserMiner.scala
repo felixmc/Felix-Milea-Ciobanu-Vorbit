@@ -1,6 +1,8 @@
 package com.felixmilea.vorbit.reddit.mining
 
-class UserMiner(config: MinerConfig) extends MiningEngine(config) {
+import akka.actor.ActorRef
+
+class UserMiner(config: MinerConfig, entityManager: ActorRef) extends MiningEngine(config, entityManager) {
 
   override def mine() {
 

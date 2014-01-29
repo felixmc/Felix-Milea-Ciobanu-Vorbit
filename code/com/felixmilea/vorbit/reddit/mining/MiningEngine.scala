@@ -3,15 +3,16 @@ package com.felixmilea.vorbit.reddit.mining
 import java.util.Date
 import com.felixmilea.vorbit.JSON.JSONParser
 import com.felixmilea.vorbit.JSON.JSONTraverser
-import com.felixmilea.vorbit.data.EntityManager
 import com.felixmilea.vorbit.reddit.connectivity.Client
 import com.felixmilea.vorbit.reddit.models.Comment
 import com.felixmilea.vorbit.reddit.models.ModelParser
 import com.felixmilea.vorbit.reddit.models.Post
 import com.felixmilea.vorbit.reddit.models.RedditPost
 import com.felixmilea.vorbit.utils.Loggable
+import akka.actor.ActorRef
+import com.felixmilea.vorbit.data.DataSetManager
 
-abstract class MiningEngine(protected val config: MinerConfig) extends Loggable {
+abstract class MiningEngine(protected val config: MinerConfig, protected val dataManager: ActorRef) extends Loggable {
   protected val client = new Client
 
   def mine()
@@ -23,7 +24,7 @@ abstract class MiningEngine(protected val config: MinerConfig) extends Loggable 
       if (commentsNode(comIndex)("kind")().get == "t1") {
         val comment = ModelParser.parse(ModelParser.T1)(commentsNode(comIndex)("data"))
         if (isValidComment(comment)) {
-          if (EntityManager.persistPost(comment, config.name)) logMined(comment)
+          dataManager ! DataSetManager.PersistPost(comment, config.name)
           if (nesting >= 0 && !commentsNode(comIndex)("data")("replies")().get.isEmpty)
             mineThreadComments(commentsNode(comIndex)("data")("replies"), nesting - 1)
         }
@@ -51,11 +52,6 @@ abstract class MiningEngine(protected val config: MinerConfig) extends Loggable 
     return true
   }
 
-  def logMined(post: RedditPost) {
-    //    val content = (if (post.isInstanceOf[Post]) post.asInstanceOf[Post].title + " " else "") + post.content
-    //    Log.Debug(s"\tMined post `$post` | ngrams parsed: ${WordParser.parseAsText(content)}")
-  }
-
   def subredditUrl(name: String, after: String): String = {
     val vars = (if (!config.time.isEmpty) s"&t=${config.time}" else "") + (if (after.isEmpty()) "" else s"&after=t3_$after")
     return s"r/$name/${config.postSort}/.json?limit=100$vars"
@@ -68,9 +64,9 @@ abstract class MiningEngine(protected val config: MinerConfig) extends Loggable 
 }
 
 object MiningEngine {
-  def get(config: MinerConfig): MiningEngine = config.unitType match {
-    case "subreddit" => new SubredditMiner(config)
-    case "user" => new UserMiner(config)
+  def get(config: MinerConfig, entityManager: ActorRef): MiningEngine = config.unitType match {
+    case "subreddit" => new SubredditMiner(config, entityManager)
+    case "user" => new UserMiner(config, entityManager)
     case _ => throw new IllegalArgumentException(s"'${config.unitType}' is not a valid unit type.")
   }
 }
