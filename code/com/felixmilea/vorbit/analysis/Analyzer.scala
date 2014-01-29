@@ -10,7 +10,7 @@ import com.felixmilea.vorbit.utils.Loggable
 object Analyzer extends App with Loggable {
   ConfigManager.init
   val postCount = 20
-  val posts = getPosts(postCount).map(p => p.content).filter(s => TextUnitParser.isGoodSource(s))
+  val posts = getPosts(postCount).map(p => p.content) //.filter(s => TextUnitParser.isGoodSource(s))
   val parser = new TextUnitParser
 
   for (post <- posts) {
@@ -24,7 +24,6 @@ object Analyzer extends App with Loggable {
     val sb = new StringBuilder
 
     for (i <- 0 until ngrams.length) {
-      //      sb ++= s"[${Console.WHITE}${ngrams(i)}${Console.CYAN}] "
       sb ++= s"[${ngrams(i)}] "
       if ((i + 1) % 20 == 0) {
         Info(sb.mkString)

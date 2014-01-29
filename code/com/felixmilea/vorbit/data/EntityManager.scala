@@ -29,7 +29,7 @@ object EntityManager extends Initable with Loggable {
       db.conn.commit()
     } catch {
       case t: Throwable => {
-        Error(s"\tA database error was encountered while attempting to store post `$post`")
+        Error(s"\tA database error was encountered while attempting to store post `$post`: ${t.getMessage}")
         success = false
       }
     } finally {
@@ -40,7 +40,7 @@ object EntityManager extends Initable with Loggable {
   }
 
   private def insert(db: DBConnection, miner: String, post: RedditPost): PreparedStatement = {
-    val ps = db.conn.prepareStatement(s"INSERT INTO `${table(miner)}`(`reddit_id`, `parent`, `type`, `author`, `subreddit`, `title`, `content`, `children_count`, `ups`, `downs`, `gilded`, `miner`, `date_posted`, `date_mined`) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
+    val ps = db.conn.prepareStatement(s"INSERT INTO `${table(miner)}`(`reddit_id`, `parent`, `type`, `author`, `subreddit`, `title`, `content`, `children_count`, `ups`, `downs`, `gilded`, `date_posted`, `date_mined`) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)")
     val isComment = post.isInstanceOf[Comment]
 
     ps.setString(1, post.redditId)
