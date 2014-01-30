@@ -11,6 +11,7 @@ class Log(val printLevel: Int = 0, val fileLevel: Int = 1, val out: PrintStream 
   private val datetimeFormat = new SimpleDateFormat("EEE MMM dd HH:mm:ss yyyy")
   private val timeFormat = new SimpleDateFormat("HH:mm:ss")
   private val logFile: String = String.format(Log.logFileFormat, datetime.replace(':', '.'))
+  private val fw = new FileWriter(logFile, true)
 
   // create log file
   new File("appdata/logs.bob.log").createNewFile()
@@ -21,11 +22,7 @@ class Log(val printLevel: Int = 0, val fileLevel: Int = 1, val out: PrintStream 
   private def datetime = datetimeFormat.format(new Date)
 
   private def printlnToFile(text: String) = printToFile(s"$text\n")
-  private def printToFile(text: String) {
-    val fw = new FileWriter(logFile, true)
-    fw.write(text)
-    fw.close()
-  }
+  private def printToFile(text: String) = fw.write(text)
 
   def receive = {
     case Loggable.Message(logger, message) => {

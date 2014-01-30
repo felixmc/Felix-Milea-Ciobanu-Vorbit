@@ -19,7 +19,7 @@ class DataSetManager extends Actor with Loggable {
     try {
       ps.executeUpdate()
       db.conn.commit()
-      Debug(s"\tCollected post `$post`")
+      //      Debug(s"\tCollected post `$post`")
     } catch {
       case t: Throwable => {
         Error(s"\tA database error was encountered while attempting to store post `$post`: ${t.getMessage}")
@@ -42,8 +42,8 @@ class DataSetManager extends Actor with Loggable {
     ps.setInt(9, post.ups)
     ps.setInt(10, post.downs)
     ps.setInt(11, if (isComment) post.asInstanceOf[Comment].gilded else 0)
-    ps.setDate(12, new java.sql.Date(post.date_posted.getTime()))
-    ps.setDate(13, new java.sql.Date(new java.util.Date().getTime()))
+    ps.setTimestamp(12, new java.sql.Timestamp(post.date_posted.getTime()))
+    ps.setTimestamp(13, new java.sql.Timestamp(new java.util.Date().getTime()))
 
     return ps
   }
@@ -55,7 +55,7 @@ class DataSetManager extends Actor with Loggable {
     ps.setInt(2, post.ups)
     ps.setInt(3, post.downs)
     ps.setInt(4, if (isComment) post.asInstanceOf[Comment].gilded else 0)
-    ps.setDate(5, new java.sql.Date(post.date_posted.getTime()))
+    ps.setTimestamp(5, new java.sql.Timestamp(post.date_posted.getTime()))
     ps.setString(6, post.redditId)
 
     return ps
