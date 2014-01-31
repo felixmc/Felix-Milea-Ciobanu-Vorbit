@@ -10,7 +10,7 @@ import akka.actor.Actor
 class Log(val printLevel: Int = 0, val fileLevel: Int = 1, val out: PrintStream = System.out) extends Actor {
   private val datetimeFormat = new SimpleDateFormat("EEE MMM dd HH:mm:ss yyyy")
   private val timeFormat = new SimpleDateFormat("HH:mm:ss")
-  private val logFile: String = String.format(Log.logFileFormat, datetime.replace(':', '.'))
+  private val logFile: String = String.format(Log.logFileFormat, datetimeFormat.format(new Date()).replace(':', '.'))
   private val fw = new FileWriter(logFile, true)
 
   // create log file
@@ -18,19 +18,16 @@ class Log(val printLevel: Int = 0, val fileLevel: Int = 1, val out: PrintStream 
 
   def this() = this(0, 1, System.out)
 
-  private def timestamp = timeFormat.format(new Date)
-  private def datetime = datetimeFormat.format(new Date)
-
   private def printlnToFile(text: String) = printToFile(s"$text\n")
   private def printToFile(text: String) = fw.write(text)
 
   def receive = {
-    case Loggable.Message(logger, message) => {
+    case Loggable.Message(logger, message, timestamp) => {
       val padding = " " * (Log.messagePadding - logger.label.length)
       if (printLevel <= logger.level)
-        out.println(s"${Console.RESET}${logger.labelColor} $timestamp $padding${logger.label} ${Console.RESET}${logger.messageColor} ${message}${Console.RESET}")
+        out.println(s"${Console.RESET}${logger.labelColor} ${timeFormat.format(timestamp)} $padding${logger.label} ${Console.RESET}${logger.messageColor} ${message}${Console.RESET}")
       if (fileLevel <= logger.level)
-        printlnToFile(s"[$timestamp] ${logger.label}:$padding ${message}")
+        printlnToFile(s"[${timeFormat.format(timestamp)}] ${logger.label}:$padding ${message}")
     }
   }
 

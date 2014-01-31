@@ -1,7 +1,9 @@
 package com.felixmilea.vorbit.utils
 
+import java.util.Date
+
 trait Loggable {
-  protected[this] lazy val log = ApplicationUtils.getLog
+  protected[this] lazy val log = ApplicationUtils.log
   def Debug(message: String) = log ! Loggable.Message(Log.Debug, message)
   def Info(message: String) = log ! Loggable.Message(Log.Info, message)
   def Warning(message: String) = log ! Loggable.Message(Log.Warning, message)
@@ -10,5 +12,5 @@ trait Loggable {
 }
 
 object Loggable {
-  case class Message(logger: Log.Logger, text: String)
+  case class Message(logger: Log.Logger, text: String, timestamp: Date = new Date())
 }
