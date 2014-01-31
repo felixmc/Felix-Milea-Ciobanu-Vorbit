@@ -5,20 +5,6 @@ import akka.actor.Props
 import akka.actor.ActorRef
 
 object ApplicationUtils {
-  private var actorSystem: ActorSystem = null
-  private var log: ActorRef = null
-
-  def getActorSystem: ActorSystem = {
-    if (actorSystem == null) {
-      actorSystem = ActorSystem("Application")
-    }
-    return actorSystem
-  }
-
-  def getLog: ActorRef = {
-    if (log == null) {
-      log = getActorSystem.actorOf(Props[Log], "Log")
-    }
-    return log
-  }
+  lazy val actorSystem: ActorSystem = ActorSystem("Application")
+  lazy val log: ActorRef = actorSystem.actorOf(Props[Log], "Log")
 }
