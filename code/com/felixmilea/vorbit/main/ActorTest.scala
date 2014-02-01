@@ -1,11 +1,9 @@
 package com.felixmilea.vorbit.main
 
-import java.util.Date
 import akka.actor.Actor
 import akka.actor.ActorLogging
 import akka.actor.ActorSystem
 import akka.actor.Props
-import com.felixmilea.vorbit.utils.Log
 import com.felixmilea.vorbit.data.DBConnection
 import com.felixmilea.vorbit.utils.ConfigManager
 import akka.routing.SmallestMailboxRouter
@@ -17,7 +15,7 @@ object ActorTest extends App with Loggable {
 
   ConfigManager.init
 
-  val system = ApplicationUtils.getActorSystem
+  val system = ApplicationUtils.actorSystem
 
   class PersistenceActor extends Actor {
     val db = new DBConnection(true)

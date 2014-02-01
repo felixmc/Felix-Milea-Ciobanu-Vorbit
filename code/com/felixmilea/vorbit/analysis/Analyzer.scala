@@ -21,6 +21,7 @@ object Analyzer extends App with Loggable {
   def sep = Warning("=" * 180)
 
   def printNgrams(ngrams: Seq[String]) {
+    sep
     val sb = new StringBuilder
 
     for (i <- 0 until ngrams.length) {
@@ -33,8 +34,6 @@ object Analyzer extends App with Loggable {
 
     if (!sb.isEmpty)
       Info(sb.mkString)
-
-    sep
   }
 
   def getPosts(count: Int = 100): Vector[Comment] = {
