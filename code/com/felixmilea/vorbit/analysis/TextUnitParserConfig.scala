@@ -23,7 +23,9 @@ object TextUnitParserConfig {
         //        "\\(\\w(.)*?\\)", // paranthesis content
         "\\[(.)*?\\]", // bracketed content
         ">.*?\n", // quoted content
-        "(?<=\\s|^)\\d\\)" // numbered list e.g. 1) 2)
+        "(?<=\\s|^)\\d\\)", // numbered list e.g. 1) 2)
+        "(?<=\\s)'(?=\\s)", // lonely apostrophes
+        "\\\\" // back slashes
         ),
       phrases = Vector("united states"),
       wordSplitExceptions = Vector(
@@ -33,6 +35,7 @@ object TextUnitParserConfig {
         (BW("/") -> "slash"),
         (BD("\\$") -> "dollarSign"),
         (D(",") -> "numberComma"),
+        (AD("%") -> "percent"),
         (W("'") -> "apostrophe")))
   }
 

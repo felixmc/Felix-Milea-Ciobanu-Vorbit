@@ -32,6 +32,10 @@ class TextUnitParser(val config: TextUnitParserConfig = TextUnitParserConfig.get
       .map(n => n
         // replace new line with place holder
         .replaceAll("\n", "NL")
+
+        // escape apostrophe for db
+        .replaceAll("'", "’")
+
         // remove whitespace
         .replaceAll("[\\s]+", ""))
 

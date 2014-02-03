@@ -6,10 +6,11 @@ import com.felixmilea.vorbit.reddit.models.RedditPost
 import com.felixmilea.vorbit.reddit.models.Comment
 import com.felixmilea.vorbit.utils.Loggable
 import com.felixmilea.vorbit.reddit.models.Post
+import com.felixmilea.vorbit.utils.ApplicationUtils
 
 class DataSetManager extends Actor with Loggable {
-  private val db = new DBConnection(true)
-  private val setupStatement = db.conn.prepareCall("call setup_miner(?)")
+  private[this] lazy val db = new DBConnection(true)
+  private[this] lazy val setupStatement = db.conn.prepareCall("CALL setup_dataset(?)")
 
   private def getTableA(dataSet: String) = s"mdt_${dataSet}_a1"
 
@@ -19,10 +20,10 @@ class DataSetManager extends Actor with Loggable {
     try {
       ps.executeUpdate()
       db.conn.commit()
-      //      Debug(s"\tCollected post `$post`")
+      ApplicationUtils.actor("NgramParser") ! NGramParser.ParseNgrams(post, dataSet)
     } catch {
       case t: Throwable => {
-        Error(s"\tA database error was encountered while attempting to store post `$post`: ${t.getMessage}")
+        Error(s"\tAn error was encountered while attempting to store post `$post`: ${t.getMessage}")
       }
     }
   }
