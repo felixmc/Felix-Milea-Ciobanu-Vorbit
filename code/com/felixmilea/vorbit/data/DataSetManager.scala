@@ -62,7 +62,12 @@ class DataSetManager extends Actor with Loggable {
     return ps
   }
 
-  def hasPost(db: DBConnection, dataSet: String, redditId: String): Boolean = db.executeQuery(s"SELECT * FROM `${getTableA(dataSet)}` WHERE `reddit_id` = '$redditId' LIMIT 1").next()
+  def hasPost(db: DBConnection, dataSet: String, redditId: String): Boolean = {
+    val rs = db.executeQuery(s"SELECT * FROM `${getTableA(dataSet)}` WHERE `reddit_id` = '$redditId' LIMIT 1")
+    val hasPost = rs.next()
+    rs.close()
+    return hasPost
+  }
 
   def setupDataSet(name: String) {
     setupStatement.setString(1, name)

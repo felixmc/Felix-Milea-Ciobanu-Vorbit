@@ -17,6 +17,8 @@ class Connection(uri: String, params: ConnectionParameters = new ConnectionParam
 
   private val conn: HttpURLConnection = URL(uri + query).openConnection().asInstanceOf[HttpURLConnection]
 
+  //  Warning(conn.getURL().toString)
+
   private var resp: String = null
 
   headers.foreach(h => conn.setRequestProperty(h._1, h._2))

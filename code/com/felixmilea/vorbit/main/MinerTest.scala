@@ -16,7 +16,7 @@ object MinerTest extends App {
 
   val minerCount = ConfigManager("miners")(JSONParser.L).get.length
   val postEntityManager = ApplicationUtils.actorSystem.actorOf(Props[DataSetManager].withRouter(SmallestMailboxRouter(5 * minerCount)), "PostEntityManager")
-  ApplicationUtils.actorSystem.actorOf(Props[NGramParser].withRouter(SmallestMailboxRouter(1 * minerCount)), "NgramParser")
+  ApplicationUtils.actorSystem.actorOf(Props[NGramParser].withRouter(SmallestMailboxRouter(10 * minerCount)), "NgramParser")
 
   // read config file and start all miners
   for (minerIndex <- (0 until minerCount).par) {
