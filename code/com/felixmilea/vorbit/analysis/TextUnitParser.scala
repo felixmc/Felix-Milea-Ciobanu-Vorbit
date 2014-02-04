@@ -4,7 +4,7 @@ import scala.collection.mutable.ArrayBuffer
 import java.util.regex.Pattern
 import com.felixmilea.vorbit.utils.Log
 
-class TextUnitParser(val config: TextUnitParserConfig = TextUnitParserConfig.getDefault) {
+class TextUnitParser(val config: TextUnitParserConfig = TextUnitParserConfig.Default) {
   import TextUnitParser._
 
   def parse(inputs: Seq[String]): Seq[Seq[String]] = {

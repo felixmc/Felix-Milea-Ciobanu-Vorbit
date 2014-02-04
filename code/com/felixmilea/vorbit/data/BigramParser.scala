@@ -4,17 +4,23 @@ import akka.actor.Actor
 
 class BigramParser extends Actor {
   private[this] lazy val db = new DBConnection(true)
+  private[this] val addBigramsProc = db.conn.prepareCall("{CALL add_bigrams(?,?,?)}")
 
   private def getTableC1(dataSet: String) = s"mdt_${dataSet}_c1"
 
   def receive = {
-    case (a: Int, b: Int) => {
-
+    case BigramParser.Bigram(a, b, dataSet) => {
+      addBigramsProc.clearParameters()
+      addBigramsProc.setInt(1, a)
+      addBigramsProc.setInt(2, b)
+      addBigramsProc.setString(3, dataSet)
+      addBigramsProc.executeUpdate()
+      db.conn.commit()
     }
   }
 
 }
 
 object BigramParser {
-  case class ParseBigrams(ngrams: Array[String], dataSet: String)
+  case class Bigram(ngram1: Int, ngram2: Int, dataSet: String)
 }

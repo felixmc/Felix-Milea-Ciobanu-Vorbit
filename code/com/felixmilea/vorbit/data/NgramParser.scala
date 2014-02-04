@@ -9,6 +9,7 @@ import com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException
 import com.felixmilea.vorbit.utils.Loggable
 import com.mysql.jdbc.MysqlDataTruncation
 import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException
+import com.felixmilea.vorbit.utils.ApplicationUtils
 
 class NGramParser extends Actor with Loggable {
   private[this] val db = new DBConnection(true)
@@ -28,14 +29,14 @@ class NGramParser extends Actor with Loggable {
   }
 
   private def processNgrams(text: String, dataSet: String) {
-    val ngrams = parser.parse(text) // split text into ngrams
+    val ids = parser.parse(text) // split text into ngrams
       .map(processNgram(_, dataSet)) // store ngrams and retrieve their id
       .filter(_ != -1) // remove bad ids
       .+:(NGramParser.NULL_ID).:+(NGramParser.NULL_ID) // padd with nulls
 
-    //    for (i <- 0 until ids.length - 1) {
-    //      // TODO: pass ngrams to bigram parser
-    //    }
+    for (i <- 0 until ids.length - 1) {
+      ApplicationUtils.actor("BigramParser") ! BigramParser.Bigram(ids(i), ids(i + 1), dataSet)
+    }
 
   }
 
@@ -53,11 +54,12 @@ class NGramParser extends Actor with Loggable {
       return id
     } catch {
       case msqlicve: MySQLIntegrityConstraintViolationException => {
-        Error(s"Duplicate ngram: $ngram")
+        Error(s"Duplicate ngram: $ngram\t${msqlicve.getMessage}")
+        Thread.sleep(700)
         processNgram(ngram, dataSet)
       }
       case mdt: MysqlDataTruncation => {
-        Error(s"ngram: $ngram")
+        Error(s"Ngram too long (${ngram.length} chars): $ngram")
         -1
       }
     }
