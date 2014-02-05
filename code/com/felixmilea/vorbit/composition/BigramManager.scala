@@ -8,7 +8,7 @@ import scala.collection.mutable.MapBuilder
 class BigramManager(dataSet: String) {
   private[this] val table = s"mdt_${dataSet}_c1"
   private[this] val db = new DBConnection(true)
-  private[this] val query = db.conn.prepareStatement(s"SELECT * FROM `$table` ORDER BY `ngram1` LIMIT 100")
+  private[this] val query = db.conn.prepareStatement(s"SELECT * FROM `$table` ORDER BY `ngram1`")
 
   private[this] val data: Map[Int, Map[Int, Int]] = {
     // get rows
@@ -65,6 +65,32 @@ class BigramManager(dataSet: String) {
   private def emptyFreqMap = new HashMap[Int, Int]
   private val noFreqs = emptyFreqMap
 
-  def getBigramsForNgram1(id: Int): Map[Int, Int] = data.getOrElse(id, noFreqs)
-  def apply(first: Int)(second: Int): Int = getBigramsForNgram1(first).getOrElse(second, 0)
+  // mutable map that holds total freqs for a single ngram1
+  private val totalsCache: scala.collection.mutable.Map[Int, Int] = new scala.collection.mutable.HashMap[Int, Int]
+
+  // gets total freqs for a single ngram1 or calculates it on spot and caches it
+  def getTotal(id: Int): Int = {
+    totalsCache.getOrElse(id, {
+      val total = getNgram1(id).values.sum
+      totalsCache.put(id, total)
+      total
+    })
+  }
+
+  def getNgram1(id: Int): Map[Int, Int] = data.getOrElse(id, noFreqs)
+
+  // gets the ngram2 from the bigram associated with the given freq for the given ngram1
+  def getNgram2(id: Int, freq: Int): Int = {
+    var tFreq = 0
+
+    getNgram1(id).find(kv => {
+      tFreq = tFreq + kv._2
+      tFreq >= freq
+    }) match {
+      case Some(kv) => kv._1
+      case _ => -1
+    }
+  }
+
+  def getFreq(ngram1Id: Int)(ngram2Id: Int): Int = getNgram1(ngram1Id).getOrElse(ngram2Id, 0)
 }
