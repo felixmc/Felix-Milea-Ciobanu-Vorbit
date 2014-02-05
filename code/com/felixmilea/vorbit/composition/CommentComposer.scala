@@ -4,7 +4,7 @@ import com.felixmilea.vorbit.utils.Loggable
 
 object CommentComposer extends App with Loggable {
   val dataSet = "answerBot"
-  val bmc = new BigramMarkovChain(dataSet)
+  val markovChain = new TrigramMarkovChain(dataSet)
   val tui = new TextUnitInjector(dataSet)
   val count = 10
   val noSpaceChars = "?!.,:;"
@@ -16,7 +16,7 @@ object CommentComposer extends App with Loggable {
 
   def compose(): String = {
     val sb = new StringBuilder
-    val units = tui.parseChain(bmc.generate)
+    val units = tui.parseChain(markovChain.generate)
 
     for (i <- 0 until units.length) {
       sb ++= units(i)

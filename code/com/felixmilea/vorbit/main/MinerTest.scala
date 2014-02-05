@@ -8,15 +8,17 @@ import com.felixmilea.vorbit.utils.ConfigManager
 import com.felixmilea.vorbit.utils.ApplicationUtils
 import com.felixmilea.vorbit.data.DataSetManager
 import akka.routing.SmallestMailboxRouter
-import com.felixmilea.vorbit.data.NGramParser
+import com.felixmilea.vorbit.data.TextUnitProcessor
 import com.felixmilea.vorbit.data.BigramParser
+import com.felixmilea.vorbit.data.TrigramParser
 
 object MinerTest extends App {
 
   val minerCount = ApplicationUtils.config("miners")(JSONParser.L).get.length
   val postEntityManager = ApplicationUtils.actorSystem.actorOf(Props[DataSetManager].withRouter(SmallestMailboxRouter(5 * minerCount)), "PostEntityManager")
-  ApplicationUtils.actorSystem.actorOf(Props[NGramParser].withRouter(SmallestMailboxRouter(10 * minerCount)), "NgramParser")
+  ApplicationUtils.actorSystem.actorOf(Props[TextUnitProcessor].withRouter(SmallestMailboxRouter(10 * minerCount)), "NgramParser")
   ApplicationUtils.actorSystem.actorOf(Props[BigramParser].withRouter(SmallestMailboxRouter(10 * minerCount)), "BigramParser")
+  ApplicationUtils.actorSystem.actorOf(Props[TrigramParser].withRouter(SmallestMailboxRouter(10 * minerCount)), "TrigramParser")
 
   // read config file and start all miners
   for (minerIndex <- (0 until minerCount).par) {

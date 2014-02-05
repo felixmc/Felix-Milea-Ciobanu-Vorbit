@@ -20,7 +20,7 @@ class DataSetManager extends Actor with Loggable {
     try {
       ps.executeUpdate()
       db.conn.commit()
-      ApplicationUtils.actor("NgramParser") ! NGramParser.ParseNgrams(post, dataSet)
+      ApplicationUtils.actor("NgramParser") ! TextUnitProcessor.ParseNgrams(post, dataSet)
     } catch {
       case t: Throwable => {
         Error(s"\tAn error was encountered while attempting to store post `$post`: ${t.getMessage}")

@@ -11,7 +11,7 @@ import com.mysql.jdbc.MysqlDataTruncation
 import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException
 import com.felixmilea.vorbit.utils.ApplicationUtils
 
-class NGramParser extends Actor with Loggable {
+class TextUnitProcessor extends Actor with Loggable {
   private[this] val db = new DBConnection(true)
   private[this] val parser = new TextUnitParser
   private[this] val addNgramProc = db.conn.prepareCall("{CALL add_ngram(?,?,?)}")
@@ -19,7 +19,7 @@ class NGramParser extends Actor with Loggable {
   private def getTableB1(dataSet: String) = s"mdt_${dataSet}_b1"
 
   def receive = {
-    case NGramParser.ParseNgrams(post, dataSet) => post match {
+    case TextUnitProcessor.ParseNgrams(post, dataSet) => post match {
       case c: Comment => processNgrams(c.content, dataSet)
       case p: Post => {
         processNgrams(p.content, dataSet)
@@ -32,14 +32,17 @@ class NGramParser extends Actor with Loggable {
     val ids = parser.parse(text) // split text into ngrams
       .map(processNgram(_, dataSet)) // store ngrams and retrieve their id
       .filter(_ != -1) // remove bad ids
-      .+:(NGramParser.NULL_ID).:+(NGramParser.NULL_ID) // padd with nulls
+      .+:(TextUnitProcessor.NULL_ID).:+(TextUnitProcessor.NULL_ID) // padd with nulls
 
     // if actual ngram units were found in the text (2 means empty bc of null padding)
-    if (ids.length > 2)
+    if (ids.length > 2) {
       for (i <- 0 until ids.length - 1) {
         ApplicationUtils.actor("BigramParser") ! BigramParser.Bigram(ids(i), ids(i + 1), dataSet)
       }
-
+      for (i <- 0 until ids.length - 2) {
+        ApplicationUtils.actor("TrigramParser") ! TrigramParser.Trigram(ids(i), ids(i + 1), ids(i + 2), dataSet)
+      }
+    }
   }
 
   private def processNgram(ngram: String, dataSet: String): Int =
@@ -68,7 +71,7 @@ class NGramParser extends Actor with Loggable {
 
 }
 
-object NGramParser {
+object TextUnitProcessor {
   val NULL_ID = 1
   case class ParseNgrams(post: RedditPost, dataSet: String)
 }

@@ -6,8 +6,6 @@ class BigramParser extends Actor {
   private[this] lazy val db = new DBConnection(true)
   private[this] val addBigramsProc = db.conn.prepareCall("{CALL add_bigrams(?,?,?)}")
 
-  private def getTableC1(dataSet: String) = s"mdt_${dataSet}_c1"
-
   def receive = {
     case BigramParser.Bigram(a, b, dataSet) => {
       addBigramsProc.clearParameters()

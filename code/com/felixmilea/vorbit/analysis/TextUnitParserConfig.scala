@@ -34,8 +34,8 @@ object TextUnitParserConfig {
       ">.*?\n", // quoted content
       "(?<=\\s|^)\\d\\)", // numbered list e.g. 1) 2)
       "(?<=\\s)'(?=\\s)", // lonely apostrophes
-      "\\\\" // back slashes
-      ),
+      "\\\\", // back slashes
+      "[\\[\\]\\(\\)]+"), // parents/brackets
     phrases = Vector("united states"),
     wordSplitExceptions = Vector(
       (W("&") -> "and"),
