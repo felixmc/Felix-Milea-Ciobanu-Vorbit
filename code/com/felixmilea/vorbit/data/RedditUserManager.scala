@@ -7,29 +7,20 @@ import com.felixmilea.vorbit.reddit.connectivity.Credential
 import java.sql.PreparedStatement
 import java.util.Date
 
-object RedditUserManager extends Initable {
-  private val users = new scala.collection.mutable.HashMap[String, RedditUser]
-  private var db: DBConnection = null
+object RedditUserManager {
+  private lazy val users = new scala.collection.mutable.HashMap[String, RedditUser]
+  private lazy val db: DBConnection = new DBConnection(true)
   private val users_table = "reddit_accounts"
-  private var insertStatement: PreparedStatement = null
-  private var updateStatement: PreparedStatement = null
+  private lazy val insertStatement = db.conn.prepareStatement(s"INSERT INTO `$users_table`(`password`, `modhash`, `cookie`, `expiration_date`, `username`, `date_created`) VALUES (?,?,?,?,?,?)")
+  private lazy val updateStatement: PreparedStatement = db.conn.prepareStatement(s"UPDATE `$users_table` SET `password`=?,`modhash`=?,`cookie`=?,`expiration_date`=? WHERE `username` =?")
 
-  val dependencies = Seq(DBConfig)
-  def doInit() {
-    db = new DBConnection()
-    db.connect
+  val resultSet = db.executeQuery(s"SELECT * FROM `$users_table`")
 
-    insertStatement = db.conn.prepareStatement(s"INSERT INTO `$users_table`(`password`, `modhash`, `cookie`, `expiration_date`, `username`, `date_created`) VALUES (?,?,?,?,?,?)")
-    updateStatement = db.conn.prepareStatement(s"UPDATE `$users_table` SET `password`=?,`modhash`=?,`cookie`=?,`expiration_date`=? WHERE `username` =?")
-
-    val resultSet = db.executeQuery(s"SELECT * FROM `$users_table`")
-
-    while (resultSet.next()) {
-      val session = new Session(resultSet.getString("modhash"), resultSet.getString("modhash"), resultSet.getDate("expiration_date"))
-      val credential = new Credential(resultSet.getString("username"), resultSet.getString("password"))
-      val user = new RedditUser(credential, session)
-      users += credential.username -> user
-    }
+  while (resultSet.next()) {
+    val session = new Session(resultSet.getString("modhash"), resultSet.getString("modhash"), resultSet.getDate("expiration_date"))
+    val credential = new Credential(resultSet.getString("username"), resultSet.getString("password"))
+    val user = new RedditUser(credential, session)
+    users += credential.username -> user
   }
 
   def getUser(username: String): Option[RedditUser] = Option(users.getOrElse(username, null))

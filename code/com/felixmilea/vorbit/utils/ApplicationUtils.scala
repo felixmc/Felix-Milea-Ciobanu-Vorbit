@@ -7,5 +7,6 @@ import akka.actor.ActorRef
 object ApplicationUtils {
   lazy val actorSystem: ActorSystem = ActorSystem("Application")
   lazy val log: ActorRef = actorSystem.actorOf(Props[Log], "Log")
+  lazy val config: ConfigManager = new ConfigManager("config/")
   def actor(name: String) = actorSystem.actorSelection(s"akka://Application/user/$name")
 }

@@ -13,16 +13,14 @@ import com.felixmilea.vorbit.data.BigramParser
 
 object MinerTest extends App {
 
-  ConfigManager.init
-
-  val minerCount = ConfigManager("miners")(JSONParser.L).get.length
+  val minerCount = ApplicationUtils.config("miners")(JSONParser.L).get.length
   val postEntityManager = ApplicationUtils.actorSystem.actorOf(Props[DataSetManager].withRouter(SmallestMailboxRouter(5 * minerCount)), "PostEntityManager")
   ApplicationUtils.actorSystem.actorOf(Props[NGramParser].withRouter(SmallestMailboxRouter(10 * minerCount)), "NgramParser")
   ApplicationUtils.actorSystem.actorOf(Props[BigramParser].withRouter(SmallestMailboxRouter(10 * minerCount)), "BigramParser")
 
   // read config file and start all miners
   for (minerIndex <- (0 until minerCount).par) {
-    val mineConfig = MinerConfig.parse(ConfigManager("miners")(minerIndex))
+    val mineConfig = MinerConfig.parse(ApplicationUtils.config("miners")(minerIndex))
     val miner = new Miner(mineConfig, postEntityManager)
     miner.start()
   }

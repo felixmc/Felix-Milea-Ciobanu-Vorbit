@@ -34,9 +34,11 @@ class NGramParser extends Actor with Loggable {
       .filter(_ != -1) // remove bad ids
       .+:(NGramParser.NULL_ID).:+(NGramParser.NULL_ID) // padd with nulls
 
-    for (i <- 0 until ids.length - 1) {
-      ApplicationUtils.actor("BigramParser") ! BigramParser.Bigram(ids(i), ids(i + 1), dataSet)
-    }
+    // if actual ngram units were found in the text (2 means empty bc of null padding)
+    if (ids.length > 2)
+      for (i <- 0 until ids.length - 1) {
+        ApplicationUtils.actor("BigramParser") ! BigramParser.Bigram(ids(i), ids(i + 1), dataSet)
+      }
 
   }
 

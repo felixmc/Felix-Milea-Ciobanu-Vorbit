@@ -8,7 +8,6 @@ import com.felixmilea.vorbit.utils.Log
 import com.felixmilea.vorbit.utils.Loggable
 
 object Analyzer extends App with Loggable {
-  ConfigManager.init
   val postCount = 20
   val posts = getPosts(postCount).map(p => p.content).filter(s => TextUnitParser.isGoodSource(s))
   val parser = new TextUnitParser

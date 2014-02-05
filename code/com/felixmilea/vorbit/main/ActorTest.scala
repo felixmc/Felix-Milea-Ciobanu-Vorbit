@@ -13,8 +13,6 @@ import com.felixmilea.vorbit.utils.Loggable
 object ActorTest extends App with Loggable {
   class Complex(val a: Int, val b: Int)
 
-  ConfigManager.init
-
   val system = ApplicationUtils.actorSystem
 
   class PersistenceActor extends Actor {
