@@ -4,7 +4,7 @@ import scala.util.Random
 import scala.collection.immutable.VectorBuilder
 import com.felixmilea.vorbit.utils.Loggable
 
-class TrigramMarkovChain(val dataSet: String) extends Loggable {
+class TrigramMarkovChain(val dataSet: String) {
   private val bi = new BigramManager(dataSet)
   private val tri = new TrigramManager(dataSet)
   private val TERMINATOR_ID = 1

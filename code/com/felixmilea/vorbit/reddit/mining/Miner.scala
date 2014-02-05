@@ -14,13 +14,13 @@ class Miner(private val config: MinerConfig, dataManager: ActorRef) extends Thre
 
   override def run() {
     val ft = new FunctionTimer
-    while (true) {
-      Info(s"Starting data mining operation `${config.name}`")
-      ft { engine.mine }
-      Info(s"Data mining operation `${config.name}` completed in ${ft.elapsedTime} ms")
-      Info(s"Resuming data mining operation `${config.name}` in $DELAY ms")
-      Thread.sleep(DELAY)
-    }
+    //    while (true) {
+    Info(s"Starting data mining operation `${config.name}`")
+    ft { engine.mine }
+    Info(s"Data mining operation `${config.name}` completed in ${ft.elapsedTime} ms")
+    //      Info(s"Resuming data mining operation `${config.name}` in $DELAY ms")
+    //      Thread.sleep(DELAY)
+    //    }
   }
 
 }
