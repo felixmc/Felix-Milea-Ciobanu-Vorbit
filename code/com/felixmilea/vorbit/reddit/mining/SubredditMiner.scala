@@ -7,8 +7,9 @@ import com.felixmilea.vorbit.JSON.JSONTraverser
 import com.felixmilea.vorbit.reddit.models.ModelParser
 import com.felixmilea.vorbit.utils.Log
 import com.felixmilea.vorbit.data.DataSetManager
+import com.felixmilea.vorbit.utils.ApplicationUtils
 
-class SubredditMiner(config: MinerConfig, dataManager: ActorRef) extends MiningEngine(config, dataManager) {
+class SubredditMiner(config: MinerConfig) extends MiningEngine(config) {
 
   override def mine() {
     for (subreddit <- config.units.par) {
@@ -22,8 +23,7 @@ class SubredditMiner(config: MinerConfig, dataManager: ActorRef) extends MiningE
           if (!postNode("stickied")(JSONParser.B).get) {
             val post = ModelParser.parse(ModelParser.T3)(postNode)
             if (isValidPost(post)) {
-              dataManager ! DataSetManager.PersistPost(post, config.name)
-
+              ApplicationUtils.actor("DataSetManager") ! DataSetManager.PersistPost(post, config.name)
               val commentJson = new JSONTraverser(Option(JSON.parseFull(client.get(commentsUrl(post.redditId))).get.asInstanceOf[AnyRef]))
               mineThreadComments(commentJson(1))
             }

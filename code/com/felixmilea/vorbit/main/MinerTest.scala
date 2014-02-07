@@ -16,8 +16,8 @@ import com.felixmilea.vorbit.data.QuadgramParser
 object MinerTest extends App {
 
   val minerCount = ApplicationUtils.config("miners")(JSONParser.L).get.length
-  val postEntityManager = ApplicationUtils.actorSystem.actorOf(Props[DataSetManager].withRouter(SmallestMailboxRouter(10 * minerCount)), "PostEntityManager")
-  ApplicationUtils.actorSystem.actorOf(Props[TextUnitProcessor].withRouter(SmallestMailboxRouter(20 * minerCount)), "NgramParser")
+  ApplicationUtils.actorSystem.actorOf(Props[DataSetManager].withRouter(SmallestMailboxRouter(10 * minerCount)), "DataSetManager")
+  ApplicationUtils.actorSystem.actorOf(Props[TextUnitProcessor].withRouter(SmallestMailboxRouter(20 * minerCount)), "TextUnitParser")
   ApplicationUtils.actorSystem.actorOf(Props[BigramParser].withRouter(SmallestMailboxRouter(10 * minerCount)), "BigramParser")
   ApplicationUtils.actorSystem.actorOf(Props[TrigramParser].withRouter(SmallestMailboxRouter(10 * minerCount)), "TrigramParser")
   ApplicationUtils.actorSystem.actorOf(Props[QuadgramParser].withRouter(SmallestMailboxRouter(10 * minerCount)), "QuadgramParser")
@@ -25,7 +25,7 @@ object MinerTest extends App {
   // read config file and start all miners
   for (minerIndex <- (0 until minerCount).par) {
     val mineConfig = MinerConfig.parse(ApplicationUtils.config("miners")(minerIndex))
-    val miner = new Miner(mineConfig, postEntityManager)
+    val miner = new Miner(mineConfig)
     miner.start()
   }
 

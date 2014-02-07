@@ -11,8 +11,9 @@ import com.felixmilea.vorbit.reddit.models.RedditPost
 import com.felixmilea.vorbit.utils.Loggable
 import akka.actor.ActorRef
 import com.felixmilea.vorbit.data.DataSetManager
+import com.felixmilea.vorbit.utils.ApplicationUtils
 
-abstract class MiningEngine(protected val config: MinerConfig, protected val dataManager: ActorRef) extends Loggable {
+abstract class MiningEngine(protected val config: MinerConfig) extends Loggable {
   protected val client = new Client
 
   def mine()
@@ -24,7 +25,7 @@ abstract class MiningEngine(protected val config: MinerConfig, protected val dat
       if (commentsNode(comIndex)("kind")().get == "t1") {
         val comment = ModelParser.parse(ModelParser.T1)(commentsNode(comIndex)("data"))
         if (isValidComment(comment)) {
-          dataManager ! DataSetManager.PersistPost(comment, config.name)
+          ApplicationUtils.actor("DataSetManager") ! DataSetManager.PersistPost(comment, config.name)
           if (nesting >= 0 && !commentsNode(comIndex)("data")("replies")().get.isEmpty)
             mineThreadComments(commentsNode(comIndex)("data")("replies"), nesting - 1)
         }
@@ -64,9 +65,9 @@ abstract class MiningEngine(protected val config: MinerConfig, protected val dat
 }
 
 object MiningEngine {
-  def get(config: MinerConfig, entityManager: ActorRef): MiningEngine = config.unitType match {
-    case "subreddit" => new SubredditMiner(config, entityManager)
-    case "user" => new UserMiner(config, entityManager)
+  def get(config: MinerConfig): MiningEngine = config.unitType match {
+    case "subreddit" => new SubredditMiner(config)
+    case "user" => new UserMiner(config)
     case _ => throw new IllegalArgumentException(s"'${config.unitType}' is not a valid unit type.")
   }
 }

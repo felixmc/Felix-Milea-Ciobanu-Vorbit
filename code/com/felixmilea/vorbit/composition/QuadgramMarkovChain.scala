@@ -17,7 +17,7 @@ class QuadgramMarkovChain(val dataSet: String) {
     var first = TERMINATOR_ID
     var second = bi.getNgram2(first, Random.nextInt(bi.getTotal(first)) + 1)
     var third = tri.getNgram2((first, second), Random.nextInt(tri.getTotal((first, second))) + 1)
-    var fourth = quad.getNgram2((first, second, third), genFreq((first, second, third)))
+    var fourth = nextRandomState((first, second, third))
 
     chain += second
     chain += third
@@ -29,12 +29,28 @@ class QuadgramMarkovChain(val dataSet: String) {
 
       chain += third
 
-      fourth = quad.getNgram2((first, second, third), genFreq((first, second, third)))
+      fourth = nextRandomState((first, second, third))
     }
 
     return chain.result
   }
 
   def genFreq(id: (Int, Int, Int)): Int = Random.nextInt(quad.getTotal(id)) + 1
+
+  def nextRandomState(id: (Int, Int, Int)): Int = {
+    def randProb = Random.nextInt(quad.getTotal(id))
+    def randChoice = Random.shuffle(quad.getEndStates(id)).head
+    var nextState = -1
+
+    while (nextState == -1) {
+      val prob = randProb
+      val choice = randChoice
+      if (quad.getFreq(id)(choice) > randProb) {
+        nextState = choice
+      }
+    }
+
+    return nextState
+  }
 
 }

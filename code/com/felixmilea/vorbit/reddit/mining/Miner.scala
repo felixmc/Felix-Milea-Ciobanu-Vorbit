@@ -5,12 +5,13 @@ import com.felixmilea.vorbit.utils.Log
 import com.felixmilea.vorbit.utils.Loggable
 import akka.actor.ActorRef
 import com.felixmilea.vorbit.data.DataSetManager
+import com.felixmilea.vorbit.utils.ApplicationUtils
 
-class Miner(private val config: MinerConfig, dataManager: ActorRef) extends Thread with Loggable {
+class Miner(private val config: MinerConfig) extends Thread with Loggable {
   private val DELAY = (1000 * 60) * 5
-  private val engine = MiningEngine.get(config, dataManager)
+  private val engine = MiningEngine.get(config)
 
-  dataManager ! DataSetManager.SetupDataSet(config.name)
+  ApplicationUtils.actor("DataSetManager") ! DataSetManager.SetupDataSet(config.name)
 
   override def run() {
     val ft = new FunctionTimer

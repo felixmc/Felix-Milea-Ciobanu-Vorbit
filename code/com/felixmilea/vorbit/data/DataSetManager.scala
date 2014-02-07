@@ -15,12 +15,14 @@ class DataSetManager extends Actor with Loggable {
   private def getTableA(dataSet: String) = s"mdt_${dataSet}_a1"
 
   private def persist(post: RedditPost, dataSet: String) {
-    val ps = if (hasPost(db, dataSet, post.redditId)) update(db, dataSet, post) else insert(db, dataSet, post)
+    val isOld = hasPost(db, dataSet, post.redditId)
+    val ps = if (isOld) update(db, dataSet, post) else insert(db, dataSet, post)
 
     try {
       ps.executeUpdate()
       db.conn.commit()
-      ApplicationUtils.actor("NgramParser") ! TextUnitProcessor.ParseNgrams(post, dataSet)
+      if (!isOld)
+        ApplicationUtils.actor("TextUnitParser") ! TextUnitProcessor.RedditPost(post, dataSet)
     } catch {
       case t: Throwable => {
         Error(s"\tAn error was encountered while attempting to store post `$post`: ${t.getMessage}")

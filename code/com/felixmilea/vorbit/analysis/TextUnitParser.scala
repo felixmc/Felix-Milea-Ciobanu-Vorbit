@@ -4,7 +4,7 @@ import scala.collection.mutable.ArrayBuffer
 import java.util.regex.Pattern
 import com.felixmilea.vorbit.utils.Log
 
-class TextUnitParser(val config: TextUnitParserConfig = TextUnitParserConfig.Default) {
+class TextUnitParser(val strategy: TextUnitParserStrategy = SymbolFriendlyStrategy) {
   import TextUnitParser._
 
   def parse(inputs: Seq[String]): Seq[Seq[String]] = {
@@ -12,32 +12,31 @@ class TextUnitParser(val config: TextUnitParserConfig = TextUnitParserConfig.Def
   }
 
   def parse(input: String): Seq[String] = {
-    var ngrams = input
-      // lowercase to remove irregularities
-      .toLowerCase()
+    var ngrams = (if (strategy.lowercase) input.toLowerCase else input)
 
       // normalize input
-      .normalize(config.normalizations)
+      .normalize(strategy.normalizations)
 
       // fix escaped sequences
-      .escape(config.escapedSequences)
+      .escape(strategy.escapedSequences)
 
       // remove irrelevant characters/phrases
-      .removeAll(config.removePatterns)
+      .removeAll(strategy.removePatterns)
 
       // split by word boundaries, with exceptions
-      .wordSplit(config.phrases, config.wordSplitExceptions)
+      .wordSplit(strategy.phrases, strategy.wordSplitExceptions)
 
       // apply to all ngrams..
-      .map(n => n
-        // replace new line with place holder
-        .replaceAll("\n", "NL")
+      .map(n => {
+        val ngram = n
+          // replace new line with place holder
+          .replaceAll("\n", "NL")
 
-        // escape apostrophe for db
-        .replaceAll("'", "’")
+          // escape apostrophe for db
+          .replaceAll("'", "’") // remove whitespace
 
-        // remove whitespace
-        .replaceAll("[\\s]+", ""))
+        strategy.ngramFilter(ngram)
+      })
 
     return ngrams.filter(n => !n.isEmpty) // remove empty strings from result set
   }
@@ -102,7 +101,7 @@ object TextUnitParser {
         for (i <- 0 until urls.length) output = output.replaceAllLiterally(s"${E}URL${i}$E", urls(i))
 
         // replace escape char with space in phrases
-        for (p <- phrases) output = output.replaceAll(p, p.replaceAll(s"$E", " "))
+        for (p <- phrases) output = output.replaceAll(p.replaceAll(" ", s"$E"), p)
 
         output
       })

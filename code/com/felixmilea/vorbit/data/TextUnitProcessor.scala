@@ -10,6 +10,8 @@ import com.felixmilea.vorbit.utils.Loggable
 import com.mysql.jdbc.MysqlDataTruncation
 import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException
 import com.felixmilea.vorbit.utils.ApplicationUtils
+import com.felixmilea.vorbit.analysis.SymbolFriendlyStrategy
+import com.felixmilea.vorbit.analysis.TextUnitParserStrategy
 
 class TextUnitProcessor extends Actor with Loggable {
   private[this] val db = new DBConnection(true)
@@ -19,16 +21,18 @@ class TextUnitProcessor extends Actor with Loggable {
   private def getTableB1(dataSet: String) = s"mdt_${dataSet}_b1"
 
   def receive = {
-    case TextUnitProcessor.ParseNgrams(post, dataSet) => post match {
-      case c: Comment => processNgrams(c.content, dataSet)
+    case TextUnitProcessor.Text(text, dataSet, strategy) => processNgrams(text, dataSet, strategy)
+    case TextUnitProcessor.RedditPost(post, dataSet, strategy) => post match {
+      case c: Comment => processNgrams(c.content, dataSet, strategy)
       case p: Post => {
-        processNgrams(p.content, dataSet)
-        processNgrams(p.title, dataSet)
+        processNgrams(p.content, dataSet, strategy)
+        processNgrams(p.title, dataSet, strategy)
       }
     }
   }
 
-  private def processNgrams(text: String, dataSet: String) {
+  private def processNgrams(text: String, dataSet: String, strategy: TextUnitParserStrategy) {
+    val parser = new TextUnitParser(strategy)
     val ids = parser.parse(text) // split text into ngrams
       .map(processNgram(_, dataSet)) // store ngrams and retrieve their id
       .filter(_ != -1) // remove bad ids
@@ -76,5 +80,6 @@ class TextUnitProcessor extends Actor with Loggable {
 
 object TextUnitProcessor {
   val NULL_ID = 1
-  case class ParseNgrams(post: RedditPost, dataSet: String)
+  case class RedditPost(post: com.felixmilea.vorbit.reddit.models.RedditPost, dataSet: String, strategy: TextUnitParserStrategy = SymbolFriendlyStrategy)
+  case class Text(text: String, dataSet: String, strategy: TextUnitParserStrategy = SymbolFriendlyStrategy)
 }

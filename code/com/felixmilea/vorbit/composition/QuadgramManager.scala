@@ -91,5 +91,10 @@ class QuadgramManager(dataSet: String) {
     }
   }
 
+  def getEndStates(id: (Int, Int, Int)): Vector[Int] = data.get(id) match {
+    case Some(state) => state.keys.toVector
+    case None => Vector[Int]()
+  }
+
   def getFreq(key: (Int, Int, Int))(ngram2Id: Int): Int = getNgram1(key).getOrElse(ngram2Id, 0)
 }
