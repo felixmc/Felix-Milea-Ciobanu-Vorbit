@@ -3,7 +3,7 @@ package com.felixmilea.vorbit.composition
 import com.felixmilea.vorbit.utils.Loggable
 
 object CommentComposer extends App with Loggable {
-  val dataSet = "biblebot"
+  val dataSet = "sherlockbot"
   val markovChain = new QuadgramMarkovChain(dataSet)
   val tui = new TextUnitInjector(dataSet)
   val count = 100

@@ -1,3 +1,4 @@
 *
 !*.example
+!*.sql
 !.gitignore
