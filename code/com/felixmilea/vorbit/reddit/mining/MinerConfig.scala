@@ -1,53 +1,65 @@
 package com.felixmilea.vorbit.reddit.mining
 
-import com.felixmilea.vorbit.JSON.JSONTraverser
-import com.felixmilea.vorbit.JSON.JSONParser
-import com.felixmilea.vorbit.JSON.JSONTraverser
-
 class MinerConfig(
-  val name: String = "Miner",
-  val unitType: String = "subreddit",
-  val units: List[String],
-  val postType: String = "both",
-  val postSort: String = "hot",
-  val time: String = "",
-  val postConstraints: List[MinerConfig.PostConstraints],
-  val commentConstraints: List[MinerConfig.CommentConstraints],
-  val commentSort: String = "top",
-  val commentNestingLevel: Int = 0,
-  val pages: Int = 5)
+  val dataset: String,
+  val tasks: Seq[MinerConfig.Task])
 
 object MinerConfig {
+
+  class Task(
+    val name: String,
+    val recurrence: Int,
+    val targetType: TargetType.TargetType,
+    val postType: PostType.PostType,
+    val parsePostContent: Boolean,
+    val postSort: PostSort.PostSort,
+    val postListings: Int,
+    val time: String,
+    val commentSort: CommentSort.CommentSort,
+    val commentNesting: Int,
+    val targets: Seq[Target])
+
+  object CommentSort extends Enumeration {
+    type CommentSort = Value
+    val Best = Value("best")
+    val Top = Value("top")
+    val Hot = Value("hot")
+    val New = Value("new")
+    val Controversial = Value("controversial")
+    val Old = Value("old")
+  }
+
+  object PostSort extends Enumeration {
+    type PostSort = Value
+    val Hot = Value("hot")
+    val New = Value("new")
+    val Rising = Value("rising")
+    val Controversial = Value("controversial")
+    val Top = Value("top")
+  }
+
+  object PostType extends Enumeration {
+    type PostType = Value
+    val Self = Value("self")
+    val Link = Value("link")
+    val Both = Value("both")
+  }
+
+  object TargetType extends Enumeration {
+    type TargetType = Value
+    val Subreddit = Value("subreddit")
+    val User = Value("user")
+  }
+
+  class Target(val units: Seq[String], val postConstraints: Seq[PostConstraints], val commentConstraints: Seq[CommentConstraints])
+
   class PostConstraints(
     val maxAge: Int = 0,
-    val minKarma: Int = 0) {}
+    val minKarma: Int = 0)
 
   class CommentConstraints(
     maxAge: Int = 0,
     minKarma: Int = 0,
     val minGild: Int = 0)
-    extends PostConstraints(maxAge, minKarma) {}
-
-  def parse(json: JSONTraverser): MinerConfig = {
-    val postConstraints = json("config")("postConstraints")(JSONParser.L).get.map(c => {
-      val json = new JSONTraverser(c.asInstanceOf[Option[AnyRef]])
-      new PostConstraints(json("maxAge")(JSONParser.I).get, json("minKarma")(JSONParser.I).get)
-    })
-    val commentConstraints = json("config")("commentConstraints")(JSONParser.L).get.map(c => {
-      val json = new JSONTraverser(c.asInstanceOf[Option[AnyRef]])
-      new CommentConstraints(json("maxAge")(JSONParser.I).get, json("minKarma")(JSONParser.I).get, json("minGild")(JSONParser.I).get)
-    })
-
-    return new MinerConfig(
-      name = json("name")().get,
-      unitType = json("config")("unitType")().get,
-      units = json("config")("units")(JSONParser.L).get.asInstanceOf[List[Option[String]]].map(o => o.get),
-      postType = json("config")("postType")().get,
-      postSort = json("config")("postSort")().get,
-      time = json("config")("time")().get,
-      postConstraints = postConstraints,
-      commentConstraints = commentConstraints,
-      commentSort = json("config")("commentSort")().get,
-      commentNestingLevel = json("config")("commentNestingLevel")(JSONParser.I).get)
-  }
+    extends PostConstraints(maxAge, minKarma)
 }

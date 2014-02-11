@@ -6,7 +6,7 @@ import com.felixmilea.vorbit.reddit.models.RedditPost
 import com.felixmilea.vorbit.reddit.models.Comment
 import com.felixmilea.vorbit.utils.Loggable
 import com.felixmilea.vorbit.reddit.models.Post
-import com.felixmilea.vorbit.utils.ApplicationUtils
+import com.felixmilea.vorbit.utils.App
 
 class DataSetManager extends Actor with Loggable {
   private[this] lazy val db = new DBConnection(true)
@@ -22,7 +22,7 @@ class DataSetManager extends Actor with Loggable {
       ps.executeUpdate()
       db.conn.commit()
       if (!isOld)
-        ApplicationUtils.actor("TextUnitParser") ! TextUnitProcessor.RedditPost(post, dataSet)
+        App.actor("TextUnitParser") ! TextUnitProcessor.RedditPost(post, dataSet)
     } catch {
       case t: Throwable => {
         Error(s"\tAn error was encountered while attempting to store post `$post`: ${t.getMessage}")

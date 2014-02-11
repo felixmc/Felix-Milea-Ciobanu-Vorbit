@@ -7,13 +7,13 @@ import akka.actor.Props
 import com.felixmilea.vorbit.data.DBConnection
 import com.felixmilea.vorbit.utils.ConfigManager
 import akka.routing.SmallestMailboxRouter
-import com.felixmilea.vorbit.utils.ApplicationUtils
+import com.felixmilea.vorbit.utils.App
 import com.felixmilea.vorbit.utils.Loggable
 
 object ActorTest extends App with Loggable {
   class Complex(val a: Int, val b: Int)
 
-  val system = ApplicationUtils.actorSystem
+  val system = App.actorSystem
 
   class PersistenceActor extends Actor {
     val db = new DBConnection(true)

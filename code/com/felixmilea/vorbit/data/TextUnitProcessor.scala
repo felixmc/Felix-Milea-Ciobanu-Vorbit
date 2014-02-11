@@ -9,7 +9,7 @@ import com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException
 import com.felixmilea.vorbit.utils.Loggable
 import com.mysql.jdbc.MysqlDataTruncation
 import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException
-import com.felixmilea.vorbit.utils.ApplicationUtils
+import com.felixmilea.vorbit.utils.App
 import com.felixmilea.vorbit.analysis.SymbolFriendlyStrategy
 import com.felixmilea.vorbit.analysis.TextUnitParserStrategy
 
@@ -41,13 +41,13 @@ class TextUnitProcessor extends Actor with Loggable {
     // if actual ngram units were found in the text (2 means empty bc of null padding)
     if (ids.length > 3) {
       for (i <- 0 until ids.length - 1) {
-        ApplicationUtils.actor("BigramParser") ! BigramParser.Bigram(ids(i), ids(i + 1), dataSet)
+        App.actor("BigramParser") ! BigramParser.Bigram(ids(i), ids(i + 1), dataSet)
       }
       for (i <- 0 until ids.length - 2) {
-        ApplicationUtils.actor("TrigramParser") ! TrigramParser.Trigram(ids(i), ids(i + 1), ids(i + 2), dataSet)
+        App.actor("TrigramParser") ! TrigramParser.Trigram(ids(i), ids(i + 1), ids(i + 2), dataSet)
       }
       for (i <- 0 until ids.length - 3) {
-        ApplicationUtils.actor("QuadgramParser") ! QuadgramParser.Quadgram(ids(i), ids(i + 1), ids(i + 2), ids(i + 3), dataSet)
+        App.actor("QuadgramParser") ! QuadgramParser.Quadgram(ids(i), ids(i + 1), ids(i + 2), ids(i + 3), dataSet)
       }
     }
   }

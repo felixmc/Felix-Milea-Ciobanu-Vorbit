@@ -11,63 +11,57 @@ import com.felixmilea.vorbit.reddit.models.RedditPost
 import com.felixmilea.vorbit.utils.Loggable
 import akka.actor.ActorRef
 import com.felixmilea.vorbit.data.DataSetManager
-import com.felixmilea.vorbit.utils.ApplicationUtils
+import com.felixmilea.vorbit.utils.App
 
 abstract class MiningEngine(protected val config: MinerConfig) extends Loggable {
   protected val client = new Client
 
   def mine()
 
-  protected def mineThreadComments(json: JSONTraverser, nesting: Int = config.commentNestingLevel) {
+  protected def mineThreadComments(json: JSONTraverser, nesting: Int = 0) {
     val commentsNode = json("data")("children")
 
     for (comIndex <- 0 until commentsNode(JSONParser.L).get.length) {
       if (commentsNode(comIndex)("kind")().get == "t1") {
         val comment = ModelParser.parse(ModelParser.T1)(commentsNode(comIndex)("data"))
         if (isValidComment(comment)) {
-          ApplicationUtils.actor("DataSetManager") ! DataSetManager.PersistPost(comment, config.name)
-          if (nesting >= 0 && !commentsNode(comIndex)("data")("replies")().get.isEmpty)
-            mineThreadComments(commentsNode(comIndex)("data")("replies"), nesting - 1)
+          //          App.actor("DataSetManager") ! DataSetManager.PersistPost(comment, config.name)
+          //          if (nesting >= 0 && !commentsNode(comIndex)("data")("replies")().get.isEmpty)
+          //            mineThreadComments(commentsNode(comIndex)("data")("replies"), nesting - 1)
         }
       }
     }
   }
 
   protected def isValidPost(post: Post): Boolean = {
-    if (config.postType != "both" && config.postType != post.postType) return false
-    for (ps <- config.postConstraints) {
-      if (post.karma < ps.minKarma) return false
-      if (ps.maxAge != 0 && (post.date_posted before new Date(new Date().getTime() - ps.maxAge))) return false
-    }
+    //    if (config.postType != "both" && config.postType != post.postType) return false
+    //    for (ps <- config.postConstraints) {
+    //      if (post.karma < ps.minKarma) return false
+    //      if (ps.maxAge != 0 && (post.date_posted before new Date(new Date().getTime() - ps.maxAge))) return false
+    //    }
 
     return true
   }
 
   protected def isValidComment(comment: Comment): Boolean = {
-    for (cs <- config.commentConstraints) {
-      if (comment.gilded < cs.minGild) return false
-      if (comment.karma < cs.minKarma) return false
-      if (cs.maxAge != 0 && (comment.date_posted before new Date(new Date().getTime() - cs.maxAge))) return false
-    }
+    //    for (cs <- config.commentConstraints) {
+    //      if (comment.gilded < cs.minGild) return false
+    //      if (comment.karma < cs.minKarma) return false
+    //      if (cs.maxAge != 0 && (comment.date_posted before new Date(new Date().getTime() - cs.maxAge))) return false
+    //    }
 
     return true
   }
 
   def subredditUrl(name: String, after: String): String = {
-    val vars = (if (!config.time.isEmpty) s"&t=${config.time}" else "") + (if (after.isEmpty()) "" else s"&after=t3_$after")
-    return s"r/$name/${config.postSort}/.json?limit=100$vars"
+    //    val vars = (if (!config.time.isEmpty) s"&t=${config.time}" else "") + (if (after.isEmpty()) "" else s"&after=t3_$after")
+    //    return s"r/$name/${config.postSort}/.json?limit=100$vars"
+    ""
   }
 
   def commentsUrl(redditId: String): String = {
-    return s"comments/${redditId}.json?sort=${config.commentSort}"
+    //    return s"comments/${redditId}.json?sort=${config.commentSort}"
+    ""
   }
 
-}
-
-object MiningEngine {
-  def get(config: MinerConfig): MiningEngine = config.unitType match {
-    case "subreddit" => new SubredditMiner(config)
-    case "user" => new UserMiner(config)
-    case _ => throw new IllegalArgumentException(s"'${config.unitType}' is not a valid unit type.")
-  }
 }

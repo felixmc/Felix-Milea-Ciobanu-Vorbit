@@ -18,14 +18,14 @@ class ConfigManager(val configDir: String) extends Loggable {
   new File(configDir).listFiles(new FilenameFilter() {
     def accept(dir: File, name: String): Boolean = name.endsWith(configExt)
   }).foreach(file => {
-    Debug(s"\t- Loading config file `$file`")
+    Debug(s"\t- Loading config file '$file'")
     val configName = file.getName().split("\\.")(0)
 
     val jt = JSONParser.parse(Source.fromFile(file).mkString)
 
     jt.data match {
       case Some(data) => configValues += (configName -> jt)
-      case None => Warning(s"\t- Could not parse config file `$file`")
+      case None => Warning(s"\t- Could not parse config file '$file'")
     }
   })
 

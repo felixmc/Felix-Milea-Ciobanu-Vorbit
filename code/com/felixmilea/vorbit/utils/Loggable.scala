@@ -3,7 +3,7 @@ package com.felixmilea.vorbit.utils
 import java.util.Date
 
 trait Loggable {
-  protected[this] lazy val log = ApplicationUtils.log
+  protected[this] lazy val log = App.log
   def Debug(message: String) = log ! Loggable.Message(Log.Debug, message)
   def Info(message: String) = log ! Loggable.Message(Log.Info, message)
   def Warning(message: String) = log ! Loggable.Message(Log.Warning, message)
