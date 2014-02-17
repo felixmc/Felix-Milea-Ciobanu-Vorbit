@@ -5,21 +5,15 @@ import scala.collection.mutable.ArrayBuffer
 import com.felixmilea.vorbit.utils.ConfigManager
 import com.felixmilea.vorbit.utils.Log
 import com.felixmilea.vorbit.utils.Loggable
-import com.felixmilea.vorbit.utils.App
+import com.felixmilea.vorbit.utils.AppUtils
 
 object DBConfig extends Loggable {
-  private var data: Map[String, String] = Map()
 
   def apply(property: String) = data.getOrElse(property, "")
 
-  val propNames = Seq("host", "database", "username", "password", "mined_data_table_prefix")
+  val propNames = Seq("host", "database", "username", "password")
   val props = ArrayBuffer[(String, String)]()
 
-  propNames.foreach(prop =>
-    (App.config("database")(prop)()) match {
-      case Some(value) => props += prop -> value
-      case None => Warning(s"Could not load database config property `$prop` from ConfigManager.")
-    })
+  private val data: Map[String, String] = propNames.map(prop => prop -> AppUtils.config("database")(prop).toString).filter(_ != null).toMap
 
-  data = props.toMap
 }

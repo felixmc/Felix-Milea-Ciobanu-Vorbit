@@ -1,33 +1,33 @@
 package com.felixmilea.vorbit.main
 
-import akka.actor.Props
-import com.felixmilea.vorbit.JSON.JSONParser
-import com.felixmilea.vorbit.reddit.mining.Miner
-import com.felixmilea.vorbit.reddit.mining.MinerConfig
 import com.felixmilea.vorbit.utils.ConfigManager
-import com.felixmilea.vorbit.utils.App
-import com.felixmilea.vorbit.data.DataSetManager
-import akka.routing.SmallestMailboxRouter
-import com.felixmilea.vorbit.data.TextUnitProcessor
-import com.felixmilea.vorbit.data.BigramParser
-import com.felixmilea.vorbit.data.TrigramParser
-import com.felixmilea.vorbit.data.QuadgramParser
+import com.felixmilea.vorbit.utils.AppUtils
+import com.felixmilea.vorbit.utils.Loggable
 import com.felixmilea.vorbit.reddit.mining.MinerConfigParser
+import com.felixmilea.vorbit.reddit.mining.MiningManager
+import com.felixmilea.vorbit.reddit.mining.Miner
+import com.felixmilea.vorbit.utils.ConfigPersistence
 
-object MinerTest extends App {
+object MinerTest extends App with Loggable {
 
-  val minerCount = App.config("miners")(JSONParser.L).get.length
-  App.actorSystem.actorOf(Props[DataSetManager].withRouter(SmallestMailboxRouter(10 * minerCount)), "DataSetManager")
-  App.actorSystem.actorOf(Props[TextUnitProcessor].withRouter(SmallestMailboxRouter(20 * minerCount)), "TextUnitParser")
-  App.actorSystem.actorOf(Props[BigramParser].withRouter(SmallestMailboxRouter(10 * minerCount)), "BigramParser")
-  App.actorSystem.actorOf(Props[TrigramParser].withRouter(SmallestMailboxRouter(10 * minerCount)), "TrigramParser")
-  App.actorSystem.actorOf(Props[QuadgramParser].withRouter(SmallestMailboxRouter(10 * minerCount)), "QuadgramParser")
+  val manager = new MiningManager(AppUtils.config.miners.length)
 
-  // read config file and start all miners
-  for (minerIndex <- (0 until minerCount).par) {
-    val mineConfig = MinerConfigParser.parse(App.config("miners")(minerIndex))
-    val miner = new Miner(mineConfig)
-    miner.start()
+  // start miners based on config
+  for (minerConfig <- AppUtils.config.miners) {
+    try {
+      val miner = new Miner(minerConfig, manager)
+      miner.start()
+    } catch {
+      case t: Throwable => {
+        Error(s"Unexpected error occured while creating or running miner #$minerConfig: ${t.getMessage}")
+      }
+    }
+  }
+
+  while (true) {
+    //    Thread.sleep(5000)
+    readLine()
+    manager.ping()
   }
 
 }

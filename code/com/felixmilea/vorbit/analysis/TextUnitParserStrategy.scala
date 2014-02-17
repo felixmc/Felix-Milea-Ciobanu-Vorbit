@@ -1,13 +1,14 @@
 package com.felixmilea.vorbit.analysis
 
 class TextUnitParserStrategy(
+  val name: String,
   val normalizations: Seq[(String, String)] = Vector(),
   val escapedSequences: Seq[(String, String)] = Vector(),
   val removePatterns: Seq[String] = Vector(),
   val phrases: Seq[String] = Vector(),
   val wordSplitExceptions: Seq[((String, String), String)] = Vector(),
   val lowercase: Boolean = false,
-  val ngramFilter: (String) => String = n => n) {}
+  val ngramFilter: (String) => String = n => n)
 
 object TextUnitParserStrategy {
   abstract class PatternWrapper(wrapper: String => (String, String)) {

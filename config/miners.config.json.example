@@ -1,0 +1,42 @@
+[
+	{
+		"dataset": "smartBot",
+		"active": true,
+		"tasks": [
+			{
+				"name": "hot",
+				"recurrence": 60000,
+
+				"targetType": "subreddit",
+
+				"postType": "self",
+				"parsePostContent": true,
+				"postSort": "hot",
+				"time": "all",
+				"postListings": 5,
+				"postLimit": 50,
+				"commentSort": "top",
+				"commentNesting": 1,
+
+				"targets": [
+					{
+						"units": ["askScience", "askHistorians", "explainlikeimfive"],
+						"commentConstraints": [
+							{
+								"minKarma": 200,
+								"minGild": 0,
+								"maxAge": 0
+							}
+						],
+						"postConstraints": [
+							{
+								"minKarma": 500,
+								"maxAge": 0
+							}
+						]
+					}
+				]
+			}
+		]
+	}
+]

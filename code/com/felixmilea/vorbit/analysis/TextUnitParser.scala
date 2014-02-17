@@ -7,6 +7,8 @@ import com.felixmilea.vorbit.utils.Log
 class TextUnitParser(val strategy: TextUnitParserStrategy = SymbolFriendlyStrategy) {
   import TextUnitParser._
 
+  val edition = strategy.name
+
   def parse(inputs: Seq[String]): Seq[Seq[String]] = {
     return inputs.par.map(s => parse(s)).seq
   }
@@ -33,12 +35,13 @@ class TextUnitParser(val strategy: TextUnitParserStrategy = SymbolFriendlyStrate
           .replaceAll("\n", "NL")
 
           // escape apostrophe for db
-          .replaceAll("'", "’") // remove whitespace
+          .replaceAll("'", "’")
 
         strategy.ngramFilter(ngram)
       })
 
     return ngrams.filter(n => !n.isEmpty) // remove empty strings from result set
+      .+:("NULL").:+("NULL") // padd with nulls
   }
 
 }

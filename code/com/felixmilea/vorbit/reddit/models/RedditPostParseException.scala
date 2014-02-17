@@ -1,7 +1,7 @@
 package com.felixmilea.vorbit.reddit.models
 
-import com.felixmilea.vorbit.JSON.JSONTraverser
+import com.felixmilea.vorbit.utils.JSON
 
-class RedditPostParseException(val json: JSONTraverser) extends Throwable {
+class RedditPostParseException(val json: JSON) extends Throwable {
 
 }

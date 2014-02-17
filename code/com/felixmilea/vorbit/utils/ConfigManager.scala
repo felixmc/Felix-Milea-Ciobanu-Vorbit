@@ -4,14 +4,12 @@ import scala.collection.mutable.HashMap
 import java.io.File
 import java.io.FilenameFilter
 import scala.io.Source
-import com.felixmilea.vorbit.JSON.JSONParser
-import scala.util.parsing.json.JSONObject
-import com.felixmilea.vorbit.JSON.JSONTraverser
 import com.felixmilea.vorbit.data.DBConfig
+import com.felixmilea.vorbit.reddit.mining.MinerConfigParser
 
 class ConfigManager(val configDir: String) extends Loggable {
-  private val configExt = ".config.json"
-  private[this] val configValues = new HashMap[String, JSONTraverser]()
+  private[this] val configExt = ".config.json"
+  private[this] val configValues = new HashMap[String, JSON]()
 
   Info("Initializing ConfigManager")
 
@@ -21,13 +19,14 @@ class ConfigManager(val configDir: String) extends Loggable {
     Debug(s"\t- Loading config file '$file'")
     val configName = file.getName().split("\\.")(0)
 
-    val jt = JSONParser.parse(Source.fromFile(file).mkString)
-
-    jt.data match {
-      case Some(data) => configValues += (configName -> jt)
-      case None => Warning(s"\t- Could not parse config file '$file'")
-    }
+    configValues += (configName -> JSON(Source.fromFile(file).mkString))
   })
 
-  def apply(config: String): JSONTraverser = configValues.getOrElse(config, new JSONTraverser(None))
+  val miners = this("miners")
+    .filter(c => c("active"))
+    .map(c => MinerConfigParser.parse(c))
+
+  lazy val persistence = new ConfigPersistence(this)
+
+  def apply(config: String): JSON = configValues.getOrElse(config, JSON("{}"))
 }

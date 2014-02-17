@@ -3,6 +3,11 @@
 	"username": "",
 	"password": "",
 	"database": "vorbit",
-	"setup_file": "config/db_setup.sql",
-	"mined_data_table_prefix": "mined_data_"
+	"setup": {
+		"script": "config/db_setup.sql",
+		"data": {
+			"subsets": ["one", "two"],
+			"editions": ["first", "second"]
+		}
+	}
 }

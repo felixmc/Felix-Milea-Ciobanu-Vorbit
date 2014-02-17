@@ -3,6 +3,7 @@ package com.felixmilea.vorbit.analysis
 import TextUnitParserStrategy._
 
 object WordOnlyStrategy extends TextUnitParserStrategy(
+  name = "wordOnly",
   normalizations = Vector((" vs." -> " vs "), // general word corrections
     ("[\\(\\)\\[\\]]" -> " "), // convert parenthesis to spaces
     ("\t" -> ""), // remove tabs (necessary for next one)
@@ -30,4 +31,4 @@ object WordOnlyStrategy extends TextUnitParserStrategy(
     (AD("%") -> "percent") //    (W("'") -> "apostrophe")
     ),
   lowercase = true,
-  ngramFilter = n => n.replaceAll("[\\s]", "")) {}
+  ngramFilter = n => n.replaceAll("[\\s]", ""))

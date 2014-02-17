@@ -1,12 +1,10 @@
 package com.felixmilea.vorbit.reddit.connectivity
 
-import com.felixmilea.vorbit.JSON.JSONParser
-import com.felixmilea.vorbit.utils.Log
-import scala.util.parsing.json.JSONArray
-import com.felixmilea.vorbit.JSON.JSONTraverser
-import com.felixmilea.vorbit.JSON.JSONTraverser
-import com.felixmilea.vorbit.data.RedditUserManager
 import java.net.UnknownHostException
+import scala.util.parsing.json.JSONArray
+import com.felixmilea.vorbit.utils.JSON
+import com.felixmilea.vorbit.utils.Log
+import com.felixmilea.vorbit.data.RedditUserManager
 import com.felixmilea.vorbit.utils.Loggable
 
 class Client extends Loggable {
@@ -31,10 +29,10 @@ class Client extends Loggable {
           null
       }
 
-      val json = JSONParser.parse(conn.response)("json")
+      val json = JSON(conn.response)("json")
 
       val errors = json("errors")
-      val success = errors(JSONParser.L).get.length == 0
+      val success = errors.length == 0
 
       if (success) {
         session = Session.parse(conn, json("data"))
@@ -51,7 +49,7 @@ class Client extends Loggable {
     return conn.response
   }
 
-  def getJSON(path: String): JSONTraverser = return JSONParser.parse(get(path + ".json"))
+  def getJSON(path: String): JSON = JSON(get(path))
 
   private def createConn(path: String): Connection = {
     val sessionHeaders = if (session != null) Map(("X-Modhash", session.modhash), ("Cookie", s"reddit_session=${session.cookie}")) else Map[String, String]()
@@ -66,11 +64,10 @@ class Client extends Loggable {
 
   }
 
-  def clientError(header: String, errors: JSONTraverser) {
+  def clientError(header: String, errors: JSON) {
     Error(s"$header:")
-    for (errorIndex <- 0 until errors(JSONParser.L).get.length) {
-      val err = errors(errorIndex)(JSONParser.L).get.asInstanceOf[List[String]]
-      Error(s"\t- ${err(0)}: ${err(1)}")
+    for (errorIndex <- 0 until errors.length) {
+      Error(s"\t- ${errors(errorIndex)(0)}: ${errors(1)}")
     }
   }
 }

@@ -3,6 +3,7 @@ package com.felixmilea.vorbit.analysis
 import TextUnitParserStrategy._
 
 object SymbolFriendlyStrategy extends TextUnitParserStrategy(
+  name = "symbolWords",
   normalizations = Vector((" vs." -> " vs "), (" u.s." -> " united states"), ("police man" -> "policeman"), // general word corrections
     ("[\\(\\)\\[\\]]" -> " "), // convert parenthesis to spaces
     ("\t" -> ""), // remove tabs (necessary for next one)
@@ -28,4 +29,5 @@ object SymbolFriendlyStrategy extends TextUnitParserStrategy(
     (D(",") -> "numberComma"),
     (AD("%") -> "percent"),
     (W("'") -> "apostrophe")),
-  lowercase = true) {}
+  lowercase = true,
+  ngramFilter = n => n.replaceAll("[\\s]+", ""))
