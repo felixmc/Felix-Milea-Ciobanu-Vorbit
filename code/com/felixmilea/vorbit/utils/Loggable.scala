@@ -10,7 +10,7 @@ trait Loggable {
   // optional wrapper for logged message to be used only by implement-er
   protected[this] def wrapLog(message: String): String = message
 
-  final private def messageLog(logger: Log.Logger, text: String) = log ! Message(logger, wrapLog(text))
+  final private def messageLog(logger: Log.Logger, logged: AnyRef) = log ! Message(logger, wrapLog(logged.toString))
 
   final protected[this] def Debug: LogFunction = messageLog(Log.Debug, _)
   final protected[this] def Info: LogFunction = messageLog(Log.Info, _)
@@ -22,5 +22,5 @@ trait Loggable {
 
 object Loggable {
   case class Message(logger: Log.Logger, text: String, timestamp: Date = new Date())
-  type LogFunction = Function[String, Unit]
+  type LogFunction = Function[AnyRef, Unit]
 }
