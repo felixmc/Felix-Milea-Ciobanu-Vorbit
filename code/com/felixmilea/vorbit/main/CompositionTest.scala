@@ -12,9 +12,12 @@ object CompositionTest extends App with Loggable {
   val ngrams = new NgramManager(n, "smartBot", "parents", "symbolWords")
   val chain = new NgramMarkovChain(ngrams)
 
-  (0 until count) foreach { _ =>
-    Info(chain.generate(n).mkString(" "))
-    Info("")
+  while (true) {
+    (0 until count) foreach { _ =>
+      Info(chain.generate(n).mkString(" "))
+      Info("")
+    }
+    readLine()
   }
 
 }

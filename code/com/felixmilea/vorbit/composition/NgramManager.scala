@@ -59,7 +59,6 @@ class NgramManager(val n: Int, dataset: String, subset: String, edition: String)
   }
 
   private[this] val freqs: Map[Int, Map[List[Int], Int]] = (1 to n).map(n => {
-    Debug(s"retrieving ${n}grams")
     n -> (if (n == 1) {
       ResultSetIterator(gramResults).map(r => List(r.getInt(1)) -> r.getInt("freq")).toMap
     } else {

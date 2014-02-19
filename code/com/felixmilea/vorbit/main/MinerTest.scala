@@ -9,7 +9,6 @@ import com.felixmilea.vorbit.reddit.mining.Miner
 import com.felixmilea.vorbit.utils.ConfigPersistence
 
 object MinerTest extends App with Loggable {
-
   val manager = new MiningManager(AppUtils.config.miners.length)
 
   // start miners based on config

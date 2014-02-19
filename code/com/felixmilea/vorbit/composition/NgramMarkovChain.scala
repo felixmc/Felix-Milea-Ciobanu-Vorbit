@@ -16,6 +16,8 @@ class NgramMarkovChain(ngrams: NgramManager) {
     chain += current.last
     var next = nextRandomState(trim(current, n))
 
+    //    println("start: " + current)
+
     while (next.last != ngrams.nullId) {
       current = next
       chain += current.last
@@ -34,18 +36,21 @@ class NgramMarkovChain(ngrams: NgramManager) {
   def nextRandomState(key: List[Int]): List[Int] = {
     val set = ngrams.getSet(key.length + 1).filterKeys(k => k.startsWith(key))
     val keys = set.keys.toList
-    val count = set.size
     val max = set.map(kv => kv._2).sum
 
     var nextState: List[Int] = List()
 
+    var prob = 0
+
     while (nextState.isEmpty) {
-      val prob = Random.nextInt(max)
+      prob = Random.nextInt(max)
       val choice = Random.shuffle(keys).head
       if (set(choice) > prob) {
         nextState = choice
       }
     }
+
+    //    println("next: " + nextState + " with prob of " + ((prob + 1) / max.toDouble * 100).round + "%")
 
     return nextState
   }
