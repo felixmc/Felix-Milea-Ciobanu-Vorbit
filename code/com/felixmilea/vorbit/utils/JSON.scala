@@ -29,7 +29,7 @@ class JSON(a: Any) extends Seq[JSON] with Dynamic {
     case _ => a
   }
 
-  override def toString: String = o.toString
+  override def toString: String = if (o == null) "" else o.toString
 
   def toInt: Int = o match {
     case i: Integer => i

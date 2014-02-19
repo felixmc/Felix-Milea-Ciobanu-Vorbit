@@ -1,0 +1,29 @@
+[
+	{
+		"name": "answerBot",
+		"active": true,
+		"tasks": [
+			{
+				"name": "rising questions",
+				"recurrence": 3600000,
+				"postType": "self",
+				"postSort": "hot",
+				"time": "all",
+				"postListings": 2,
+				"postLimit": 50
+
+				"targets": [
+					{
+						"units": ["askReddit"],
+						"constraints": [
+							{
+								"minKarma": 100,
+								"maxAge": 7200000
+							}
+						]
+					}
+				]
+			}
+		]
+	}
+]

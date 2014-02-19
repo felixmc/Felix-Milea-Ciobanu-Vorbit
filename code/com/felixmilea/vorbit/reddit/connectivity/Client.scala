@@ -9,39 +9,56 @@ import com.felixmilea.vorbit.utils.Loggable
 
 class Client extends Loggable {
   var session: Session = null
+  var user: RedditUser = null
 
   def isAuthenticated = session != null && !session.isExpired
 
-  def authenticate(user: RedditUser): Boolean = RedditUserManager.getSession(user.credential.username) match {
-    case Some(sess) =>
-      session = sess
-      return true
-    case None =>
-      val params = new ConnectionParameters
+  def authenticate(user: RedditUser): Boolean = {
+    this.user = user
 
-      params ++= Seq(("user" -> user.credential.username), ("passwd" -> user.credential.password), ("rem" -> "true"))
+    RedditUserManager.getSession(user.credential.username) match {
+      case Some(sess) =>
+        session = sess
 
-      val conn = try {
-        new Connection(Nodes.login, params, true)
-      } catch {
-        case uhe: UnknownHostException =>
-          Error("VorbitBot encountered an error while connecting to host: " + uhe)
-          null
+        val me = getJSON("api/me.json")
+
+        if (me.length == 0) {
+          return login()
+        }
+
+        return true
+      case None => {
+        login()
       }
+    }
+  }
 
-      val json = JSON(conn.response)("json")
+  private[this] def login(): Boolean = {
+    val params = new ConnectionParameters
 
-      val errors = json("errors")
-      val success = errors.length == 0
+    params ++= Seq(("user" -> user.credential.username), ("passwd" -> user.credential.password), ("rem" -> "true"))
 
-      if (success) {
-        session = Session.parse(conn, json("data"))
-        user.session = session
-        RedditUserManager.persist(user)
-      } else
-        clientError(s"VorbitBot authentication failed for client with username `${user.credential.username}`", errors)
+    val conn = try {
+      new Connection(Nodes.login, params, true)
+    } catch {
+      case uhe: UnknownHostException =>
+        Error("VorbitBot encountered an error while connecting to host: " + uhe)
+        null
+    }
 
-      return success
+    val json = JSON(conn.response).json
+
+    val errors = json.errors
+    val success = errors.length == 0
+
+    if (success) {
+      session = Session.parse(conn, json("data"))
+      user.session = session
+      RedditUserManager.persist(user)
+    } else
+      clientError(s"VorbitBot authentication failed for client with username `${user.credential.username}`", errors)
+
+    return success
   }
 
   def get(path: String): String = {
@@ -51,17 +68,34 @@ class Client extends Loggable {
 
   def getJSON(path: String): JSON = JSON(get(path))
 
-  private def createConn(path: String): Connection = {
-    val sessionHeaders = if (session != null) Map(("X-Modhash", session.modhash), ("Cookie", s"reddit_session=${session.cookie}")) else Map[String, String]()
+  def comment(thingId: String, text: String): String = {
+    val params = new ConnectionParameters()
 
-    try {
-      new Connection(path, headers = sessionHeaders)
+    params += ("api_type" -> "json")
+    params += ("text" -> text)
+    params += ("thing_id" -> thingId)
+
+    val headers = getAuthHeaders()
+    val conn = new Connection(s"api/comment", params, true, headers)
+    val response = conn.response
+
+    return conn.response
+  }
+
+  private def getAuthHeaders(): Map[String, String] = {
+    if (session != null) Map(("X-Modhash", session.modhash), ("Cookie", s"reddit_session=${session.cookie}")) else Map[String, String]()
+  }
+
+  private def createConn(path: String, post: Boolean = false): Connection = {
+    val sessionHeaders = getAuthHeaders()
+
+    return try {
+      new Connection(path, isPost = post, headers = sessionHeaders)
     } catch {
       case uhe: UnknownHostException =>
         Error("VorbitBot encountered an error while connecting to host: " + uhe)
         null
     }
-
   }
 
   def clientError(header: String, errors: JSON) {
