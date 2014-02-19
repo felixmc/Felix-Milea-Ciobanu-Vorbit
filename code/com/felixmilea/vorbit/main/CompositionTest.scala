@@ -9,7 +9,7 @@ object CompositionTest extends App with Loggable {
   val n = 3
   val count = 10
 
-  val ngrams = new NgramManager(n, "smartBot", "parents", "symbolWords")
+  val ngrams = new NgramManager(n, "answerBot", "children", "symbolWords")
   val chain = new NgramMarkovChain(ngrams)
 
   while (true) {

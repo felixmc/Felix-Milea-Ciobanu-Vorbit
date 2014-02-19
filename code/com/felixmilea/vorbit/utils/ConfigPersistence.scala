@@ -13,7 +13,6 @@ class ConfigPersistence(config: ConfigManager) {
   private[this] lazy val createDataset = db.conn.prepareCall("{CALL create_dataset(?,?)}")
   private[this] lazy val getDataset = db.conn.prepareStatement("SELECT `id` FROM `datasets` WHERE `name`=? LIMIT 1")
   private[this] lazy val createMiningTask = db.conn.prepareCall("{CALL create_mining_task(?, ?)}")
-  private[this] lazy val createRedditCorpus = db.conn.prepareCall("{CALL create_reddit_corpus(?)}")
 
   val data: DataConfig = {
     val setupData = config("database")("setup")("data")
@@ -55,10 +54,6 @@ class ConfigPersistence(config: ConfigManager) {
       createDataset.registerOutParameter(2, java.sql.Types.INTEGER)
       createDataset.execute()
       val datasetId = createDataset.getInt(2)
-
-      // create associated reddit corpus
-      createRedditCorpus.setInt(1, datasetId)
-      createRedditCorpus.execute()
 
       // register tasks
       miner.tasks.foreach(task => {

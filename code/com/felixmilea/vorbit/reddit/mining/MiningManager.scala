@@ -17,18 +17,21 @@ import com.felixmilea.vorbit.reddit.mining.actors.PostValidator
 import com.felixmilea.vorbit.reddit.mining.actors.PostProcessor
 import com.felixmilea.vorbit.reddit.mining.actors.TextUnitProcessor
 import com.felixmilea.vorbit.reddit.mining.actors.NgramProcessor
+import akka.routing.RouterConfig
 
 class MiningManager(minerCount: Int = 1) {
   import MiningManager._
 
   private val managedActors = Map(
     (ActorNames.downloader -> Props[RedditDownloader].withRouter(SmallestMailboxRouter(15 * minerCount))),
-    (ActorNames.taskRecorder -> Props[TaskRecorder].withRouter(SmallestMailboxRouter(1 * minerCount))),
+    (ActorNames.taskRecorder -> Props[TaskRecorder]),
     (ActorNames.validator -> Props[PostValidator].withRouter(SmallestMailboxRouter(5 * minerCount))),
     (ActorNames.postProcessor -> Props[PostProcessor].withRouter(SmallestMailboxRouter(10 * minerCount))),
     (ActorNames.textProcessor -> Props[TextUnitProcessor].withRouter(SmallestMailboxRouter(15 * minerCount))),
     (ActorNames.ngramProcessor -> Props[NgramProcessor].withRouter(SmallestMailboxRouter(15 * minerCount))) // last
     )
+
+  val a: RouterConfig = SmallestMailboxRouter(15 * minerCount)
 
   private[this] val actorManager = AppUtils.actorSystem.actorOf(Props(new ActorManager(managedActors)), "MiningActorManager")
 
