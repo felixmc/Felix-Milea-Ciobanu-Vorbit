@@ -1,21 +1,21 @@
 package com.felixmilea.vorbit.reddit.mining.actors
 
 import akka.actor.Actor
-import akka.actor.ActorRef
+import akka.actor.ActorSelection
 import com.felixmilea.vorbit.utils.JSON
 import com.felixmilea.vorbit.reddit.mining.actors.ManagedActor.WorkCommand
 import com.felixmilea.vorbit.reddit.mining.actors.ManagedActor.MinerCommand
 import com.felixmilea.vorbit.reddit.mining.config.PostSort
-import com.felixmilea.vorbit.reddit.connectivity.Client
 import com.felixmilea.vorbit.reddit.mining.config.ConfigState
+import com.felixmilea.vorbit.reddit.connectivity.Client
 import com.felixmilea.vorbit.utils.JSONException
 import com.felixmilea.vorbit.utils.AppUtils
-import akka.actor.ActorSelection
+import com.felixmilea.vorbit.reddit.mining.MiningManager
 
 class RedditDownloader extends ManagedActor {
   import RedditDownloader._
 
-  private[this] lazy val downloader = AppUtils.actor(self.path.parent.parent.child("downloader"))
+  private[this] lazy val downloader = AppUtils.actor(self.path.parent.parent.child(MiningManager.ActorNames.downloader))
   private[this] lazy val client = new Client
 
   def doReceive = {

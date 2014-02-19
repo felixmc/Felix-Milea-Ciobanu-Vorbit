@@ -1,54 +1,69 @@
 package com.felixmilea.vorbit.reddit.mining.actors
 
+import java.sql.CallableStatement
+import com.mysql.jdbc.MysqlDataTruncation
+import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException
+import akka.actor.ActorSelection
 import com.felixmilea.vorbit.data.DBConnection
 import com.felixmilea.vorbit.analysis.TextUnitParser
 import com.felixmilea.vorbit.utils.AppUtils
 import com.felixmilea.vorbit.utils.Loggable
-import com.mysql.jdbc.MysqlDataTruncation
-import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException
+import com.felixmilea.vorbit.reddit.mining.MiningManager
 
 class TextUnitProcessor extends ManagedActor {
   import TextUnitProcessor._
 
-  private[this] lazy val processor = AppUtils.actor(self.path.parent.parent.child("ngramProcessor"))
+  private[this] lazy val processor = AppUtils.actor(self.path.parent.parent.child(MiningManager.ActorNames.ngramProcessor))
 
   private[this] val db = new DBConnection(true)
+  private[this] lazy val recordSt = db.conn.prepareCall("{CALL record_1gram(?,?,?,?,?)}")
+  private[this] lazy val retrieveSt = db.conn.prepareCall("{CALL retrieve_1gram(?,?,?,?,?)}")
+
   private[this] val parser = new TextUnitParser
-  private[this] val record_1gram = db.conn.prepareCall("{CALL record_1gram(?,?,?,?,?)}")
+  private[this] val editionId = AppUtils.config.persistence.data.editions(parser.edition)
 
   def doReceive = {
-    case Text(text, dataset, subset) => {
-      val (datasetId, subsetId, editionId) = (AppUtils.config.persistence.data.datasets(dataset),
-        AppUtils.config.persistence.data.subsets(subset), AppUtils.config.persistence.data.editions(parser.edition))
-
-      val ngrams = parser.parse(text) // split text into ngrams
-
-      if (ngrams.length > 2) {
-        val ids = ngrams.map(processNgram(_, datasetId, subsetId, editionId)) // store ngrams and retrieve their id
-          .filter(_ != -1) // remove bad ids
-
-        processor ! NgramProcessor.TextUnits(ids)
-      }
+    case RecordText(text, dataset, subset) => {
+      ifSome(getNgrams(text, dataset, subset, true)) { processor ! NgramProcessor.TextUnits(_) }
+    }
+    case RetrieveText(text, dataset, subset, id, receiver) => {
+      ifSome(getNgrams(text, dataset, subset, false)) { receiver ! GramSet(dataset, editionId, subset, id, _) }
     }
   }
 
-  private def processNgram(gram: String, dataset: Int, subset: Int, edition: Int): Int =
-    try {
-      record_1gram.setInt(1, dataset)
-      record_1gram.setInt(2, subset)
-      record_1gram.setInt(3, edition)
-      record_1gram.setString(4, gram)
+  private[this] def ifSome[T](dataOption: Option[T])(callback: Function[T, Unit]) = dataOption match {
+    case Some(data) => callback(data)
+    case None => {}
+  }
 
-      record_1gram.registerOutParameter(5, java.sql.Types.INTEGER)
-      record_1gram.execute()
+  private[this] def getNgrams(text: String, dataset: Int, subset: Int, record: Boolean): Option[Seq[Int]] = {
+    val ngrams = parser.parse(text) // split text into ngrams
+
+    if (ngrams.length > 2) {
+      val ids = ngrams.map(processNgram(if (record) recordSt else retrieveSt, _, dataset, subset)) // store ngrams and retrieve their id
+        .filter(_ != -1) // remove bad ids
+      return Some(ids)
+    } else
+      return None
+  }
+
+  private[this] def processNgram(statement: CallableStatement, gram: String, dataset: Int, subset: Int): Int =
+    try {
+      statement.setInt(1, dataset)
+      statement.setInt(2, subset)
+      statement.setInt(3, editionId)
+      statement.setString(4, gram)
+
+      statement.registerOutParameter(5, java.sql.Types.INTEGER)
+      statement.execute()
       db.conn.commit()
 
-      return record_1gram.getInt(5)
+      return statement.getInt(5)
     } catch {
       case msqlicve: MySQLIntegrityConstraintViolationException => {
         Error(s"Duplicate 1gram: $gram\t${msqlicve.getMessage}")
         Thread.sleep(500)
-        processNgram(gram, dataset, subset, edition)
+        processNgram(statement, gram, dataset, subset)
       }
       case mdt: MysqlDataTruncation => {
         Error(s"1gram too long (${gram.length} chars): $gram")
@@ -59,5 +74,7 @@ class TextUnitProcessor extends ManagedActor {
 }
 
 object TextUnitProcessor {
-  case class Text(text: String, dataset: String, subset: String)
+  case class RecordText(text: String, dataset: Int, subset: Int)
+  case class RetrieveText(text: String, dataset: Int, subset: Int, id: String, receiver: ActorSelection)
+  case class GramSet(dataset: Int, edition: Int, subset: Int, id: String, data: Seq[Int])
 }

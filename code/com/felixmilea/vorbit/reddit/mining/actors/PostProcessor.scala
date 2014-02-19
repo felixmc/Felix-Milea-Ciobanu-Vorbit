@@ -8,36 +8,41 @@ import com.felixmilea.vorbit.data.DBConnection
 import com.felixmilea.vorbit.reddit.models.RedditPost
 import com.felixmilea.vorbit.utils.AppUtils
 import com.felixmilea.vorbit.reddit.mining.actors.ManagedActor.MinerCommand
-import com.felixmilea.vorbit.reddit.mining.actors.TextUnitProcessor.Text
+import com.felixmilea.vorbit.reddit.mining.actors.TextUnitProcessor.RecordText
+import com.felixmilea.vorbit.reddit.mining.MiningManager
 
 class PostProcessor extends ManagedActor {
   import PostProcessor._
 
-  private[this] lazy val processor = AppUtils.actor(self.path.parent.parent.child("textProcessor"))
+  private[this] lazy val processor = AppUtils.actor(self.path.parent.parent.child(MiningManager.ActorNames.textProcessor))
   private[this] val db = new DBConnection(true)
 
   private[this] val existsStatement = db.conn.prepareStatement(s"SELECT * FROM `reddit_corpus` WHERE `reddit_id`=? AND `dataset`=? AND `subset`=? LIMIT 1")
   private[this] val insertStatement = db.conn.prepareStatement(s"INSERT INTO `reddit_corpus`(`reddit_id`, `parent`, `type`, `author`, `subreddit`, `title`, `content`, `children_count`, `ups`, `downs`, `gilded`, `date_posted`, `date_mined`, `dataset`, `subset`) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
 
+  private[this] val (parentsSubset, childrenSubset) = (AppUtils.config.persistence.data.subsets("parents"), AppUtils.config.persistence.data.subsets("children"))
+
   def doReceive = {
     case MinerCommand(work, conf) => work match {
       case ProcessPost(post) => {
         val isPost = post.isInstanceOf[Post]
-        val isNew = !hasPost(post.redditId, conf.dataset, if (isPost) "parents" else "children")
+        val dataset = AppUtils.config.persistence.data.datasets(conf.dataset)
+        val subset = if (isPost) parentsSubset else childrenSubset
+        val isNew = !hasPost(post.redditId, dataset, subset)
 
         try {
           if (isNew) {
-            val ps = prepareInsert(db, post, conf.dataset, if (isPost) "parents" else "children")
+            val ps = prepareInsert(db, post, dataset, subset)
             ps.executeUpdate()
             db.conn.commit()
 
             if (isPost) {
-              processor ! Text(post.asInstanceOf[Post].title, conf.dataset, "parents")
+              processor ! RecordText(post.asInstanceOf[Post].title, dataset, subset)
               if (conf.task.parsePostContent) {
-                processor ! Text(post.content, conf.dataset, "parents")
+                processor ! RecordText(post.content, dataset, subset)
               }
             } else {
-              processor ! Text(post.content, conf.dataset, "children")
+              processor ! RecordText(post.content, dataset, subset)
             }
           }
         } catch {
@@ -49,17 +54,17 @@ class PostProcessor extends ManagedActor {
     }
   }
 
-  def hasPost(redditId: String, dataset: String, subset: String): Boolean = {
+  def hasPost(redditId: String, dataset: Int, subset: Int): Boolean = {
     existsStatement.setString(1, redditId)
-    existsStatement.setInt(2, AppUtils.config.persistence.data.datasets(dataset))
-    existsStatement.setInt(3, AppUtils.config.persistence.data.subsets(subset))
+    existsStatement.setInt(2, dataset)
+    existsStatement.setInt(3, subset)
     val results = existsStatement.executeQuery()
     val hasPost = results.next()
     results.close()
     return hasPost
   }
 
-  private def prepareInsert(db: DBConnection, post: RedditPost, dataset: String, subset: String): PreparedStatement = {
+  private def prepareInsert(db: DBConnection, post: RedditPost, dataset: Int, subset: Int): PreparedStatement = {
     val isComment = post.isInstanceOf[Comment]
 
     insertStatement.setString(1, post.redditId)
@@ -75,8 +80,8 @@ class PostProcessor extends ManagedActor {
     insertStatement.setInt(11, if (isComment) post.asInstanceOf[Comment].gilded else 0)
     insertStatement.setTimestamp(12, new java.sql.Timestamp(post.date_posted.getTime()))
     insertStatement.setTimestamp(13, new java.sql.Timestamp(new java.util.Date().getTime()))
-    insertStatement.setInt(14, AppUtils.config.persistence.data.datasets(dataset))
-    insertStatement.setInt(15, AppUtils.config.persistence.data.subsets(subset))
+    insertStatement.setInt(14, dataset)
+    insertStatement.setInt(15, subset)
 
     return insertStatement
   }

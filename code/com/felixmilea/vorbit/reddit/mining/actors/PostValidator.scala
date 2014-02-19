@@ -11,13 +11,14 @@ import com.felixmilea.vorbit.reddit.mining.actors.ManagedActor.MinerCommand
 import com.felixmilea.vorbit.reddit.models.Comment
 import com.felixmilea.vorbit.utils.AppUtils
 import com.felixmilea.vorbit.reddit.mining.actors.PostProcessor._
+import com.felixmilea.vorbit.reddit.mining.MiningManager
 
 class PostValidator extends ManagedActor {
   import PostValidator._
 
-  private[this] lazy val validator = AppUtils.actor(self.path.parent.parent.child("validator"))
-  private[this] lazy val downloader = AppUtils.actor(self.path.parent.parent.child("downloader"))
-  private[this] lazy val processor = AppUtils.actor(self.path.parent.parent.child("postProcessor"))
+  private[this] lazy val validator = AppUtils.actor(self.path.parent.parent.child(MiningManager.ActorNames.validator))
+  private[this] lazy val downloader = AppUtils.actor(self.path.parent.parent.child(MiningManager.ActorNames.downloader))
+  private[this] lazy val processor = AppUtils.actor(self.path.parent.parent.child(MiningManager.ActorNames.postProcessor))
 
   def doReceive = {
     case ListingResult(json, conf) => {

@@ -35,12 +35,12 @@ class NgramMarkovChain(ngrams: NgramManager) {
 
   def nextRandomState(key: List[Int]): List[Int] = {
     val set = ngrams.getSet(key.length + 1).filterKeys(k => k.startsWith(key))
-    val max = set.map(kv => kv._2).sum
+    val max = set.map(kv => kv._2._1).sum
     val prob = Random.nextInt(max)
     var cumSum = 0
 
     val nextState = set.find(state => {
-      cumSum = cumSum + state._2
+      cumSum = cumSum + state._2._1
       cumSum > prob
     }) match {
       case Some(state) => state._1

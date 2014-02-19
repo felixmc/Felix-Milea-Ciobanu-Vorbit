@@ -6,7 +6,7 @@ class NgramProcessor extends ManagedActor {
   import NgramProcessor._
 
   private[this] lazy val db = new DBConnection(true)
-  private[this] val addBigramsProc = db.conn.prepareCall("{CALL record_ngram(?,?)}")
+  private[this] lazy val addBigramsProc = db.conn.prepareCall("{CALL record_ngram(?,?)}")
 
   def doReceive = {
     case TextUnits(units) => {
