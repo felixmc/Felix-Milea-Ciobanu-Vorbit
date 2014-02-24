@@ -1,11 +1,11 @@
-package com.felixmilea.vorbit.reddit.mining.actors
+package com.felixmilea.vorbit.actors
 
-import com.felixmilea.vorbit.reddit.mining.actors.RedditCorpusRetriever._
-import com.felixmilea.vorbit.reddit.mining.SubsetAnalysisManager
+import com.felixmilea.vorbit.actors.RedditCorpusRetriever._
 import com.felixmilea.vorbit.utils.AppUtils
-import com.felixmilea.vorbit.reddit.mining.actors.TextUnitProcessor.RetrieveText
-import com.felixmilea.vorbit.reddit.mining.actors.TextUnitProcessor.GramSet
-import com.felixmilea.vorbit.reddit.mining.actors.PostGramCache.Put
+import com.felixmilea.vorbit.actors.TextUnitProcessor.RetrieveText
+import com.felixmilea.vorbit.actors.TextUnitProcessor.GramSet
+import com.felixmilea.vorbit.actors.PostGramCache.Put
+import com.felixmilea.vorbit.reddit.mining.SubsetAnalysisManager
 
 class SubsetMiningCoordinator extends ManagedActor {
   private[this] lazy val coordinator = AppUtils.actor(self.path.parent.parent.child(SubsetAnalysisManager.ActorNames.coordinator))

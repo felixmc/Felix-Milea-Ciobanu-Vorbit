@@ -1,4 +1,4 @@
-package com.felixmilea.vorbit.reddit.mining.actors
+package com.felixmilea.vorbit.actors
 
 import akka.actor.ActorSelection
 import com.felixmilea.vorbit.data.DBConnection

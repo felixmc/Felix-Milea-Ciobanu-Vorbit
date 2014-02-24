@@ -1,4 +1,4 @@
-package com.felixmilea.vorbit.reddit.mining.actors
+package com.felixmilea.vorbit.actors
 
 import com.felixmilea.vorbit.data.DBConnection
 import scala.collection.mutable.HashMap
@@ -7,9 +7,11 @@ class SubsetNgramAnalyzer extends ManagedActor {
   import SubsetNgramAnalyzer._
 
   private[this] lazy val db = {
-    val dtb = new DBConnection(true)
-    dtb.conn.setAutoCommit(true)
-    dtb
+    {
+      val dtb = new DBConnection(true)
+      dtb.conn.setAutoCommit(true)
+      dtb
+    }
   }
   private[this] lazy val compareCall = db.conn.prepareCall("{CALL record_ngram_comparison(?,?,?,?,?,?,?)}")
   private[this] lazy val ngramCall = {

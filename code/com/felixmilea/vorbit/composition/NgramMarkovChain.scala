@@ -13,7 +13,6 @@ class NgramMarkovChain(ngrams: NgramManager) {
     chain.clear
 
     var current = List(ngrams.nullId)
-    chain += current.last
     var next = nextRandomState(trim(current, n))
 
     //    println("start: " + current)
@@ -24,7 +23,6 @@ class NgramMarkovChain(ngrams: NgramManager) {
       next = nextRandomState(trim(current, n))
     }
 
-    chain += next.last
     chain.result
   }
 

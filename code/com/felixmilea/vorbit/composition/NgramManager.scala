@@ -7,18 +7,15 @@ import com.felixmilea.vorbit.data.ResultSetIterator
 import com.felixmilea.vorbit.utils.Loggable
 import com.felixmilea.vorbit.utils.AppUtils
 
-class NgramManager(val n: Int, dataset: String, subset: String, edition: String) extends Loggable {
+class NgramManager(val n: Int, dataset: Int, subset: Int, edition: Int) extends Loggable {
 
   if (n < 1)
     throw new IllegalArgumentException(s"Value '$n' for parameter n does not satisfy n > 0")
 
   private[this] val db = new DBConnection(true)
 
-  val (datasetId, subsetId, editionId) = (AppUtils.config.persistence.data.datasets(dataset),
-    AppUtils.config.persistence.data.subsets(subset), AppUtils.config.persistence.data.editions(edition))
-
   val gramResults = db.conn
-    .prepareStatement(s"SELECT `id`, `1gram`, `freq` FROM `1grams` WHERE `dataset`=$datasetId AND `subset`=$subsetId AND `edition`=$editionId ORDER BY `id`")
+    .prepareStatement(s"SELECT `id`, `1gram`, `freq` FROM `1grams` WHERE `dataset`=$dataset AND `subset`=$subset AND `edition`=$edition ORDER BY `id`")
     .executeQuery()
 
   val (textUnits, nullId) = {
@@ -61,7 +58,7 @@ class NgramManager(val n: Int, dataset: String, subset: String, edition: String)
       s"SELECT $cols, `grams`.`freq`, `grams`.`id`" +
         s" FROM `${n}grams` AS `grams`" +
         " LEFT JOIN `1grams` ON  `grams`.`gram1` = `1grams`.`id`" +
-        s" WHERE `1grams`.`dataset` = $datasetId AND `1grams`.`subset` = $subsetId AND `1grams`.`edition` = $editionId"
+        s" WHERE `1grams`.`dataset` = $dataset AND `1grams`.`subset` = $subset AND `1grams`.`edition` = $edition"
         + " ORDER BY `grams`.`gram1`")
   }
 

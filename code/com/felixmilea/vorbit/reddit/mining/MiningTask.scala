@@ -3,12 +3,12 @@ package com.felixmilea.vorbit.reddit.mining
 import com.felixmilea.vorbit.utils.Loggable
 import com.felixmilea.vorbit.reddit.mining.config.TaskConfig
 import com.felixmilea.vorbit.reddit.mining.config.ConfigState
-import com.felixmilea.vorbit.reddit.mining.actors.RedditDownloader._
-import com.felixmilea.vorbit.reddit.mining.actors.ManagedActor.MinerCommand
-import com.felixmilea.vorbit.reddit.mining.actors.TaskRecorder.UpdateTask
+import com.felixmilea.vorbit.actors.RedditDownloader._
+import com.felixmilea.vorbit.actors.TaskRecorder.UpdateTask
 import com.felixmilea.vorbit.utils.AppUtils
+import com.felixmilea.vorbit.actors.ActorSetManager
 
-class MiningTask(config: TaskConfig, manager: MiningManager) extends Thread with Loggable {
+class MiningTask(config: TaskConfig, manager: ActorSetManager) extends Thread with Loggable {
 
   override def run() {
     do {
@@ -16,7 +16,7 @@ class MiningTask(config: TaskConfig, manager: MiningManager) extends Thread with
       for (target <- config.task.targets) {
         val conf = ConfigState(config.dataset, config.task, target)
         for (unit <- target.units) {
-          manager.actors.downloader ! MinerCommand(DownloadRequest(Listing(unit, config.task.postListings), AppUtils.actor(manager.actors.validator.path)), conf)
+          manager.actors.downloader ! DownloadRequest(Listing(unit, config.task.postSort, config.task.postLimit, config.task.time, config.task.postListings), AppUtils.actor(manager.actors.validator.path))
         }
       }
 

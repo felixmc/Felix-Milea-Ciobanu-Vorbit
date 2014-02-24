@@ -1,4 +1,4 @@
-package com.felixmilea.vorbit.reddit.mining.actors
+package com.felixmilea.vorbit.actors
 
 import java.sql.CallableStatement
 import com.mysql.jdbc.MysqlDataTruncation
@@ -7,13 +7,11 @@ import akka.actor.ActorSelection
 import com.felixmilea.vorbit.data.DBConnection
 import com.felixmilea.vorbit.analysis.TextUnitParser
 import com.felixmilea.vorbit.utils.AppUtils
-import com.felixmilea.vorbit.utils.Loggable
-import com.felixmilea.vorbit.reddit.mining.MiningManager
 
 class TextUnitProcessor extends ManagedActor {
   import TextUnitProcessor._
 
-  private[this] lazy val processor = AppUtils.actor(self.path.parent.parent.child(MiningManager.ActorNames.ngramProcessor))
+  private[this] lazy val processor = AppUtils.actor(self.path.parent.parent.child(ActorSetManager.ActorNames.ngramProcessor))
 
   private[this] val db = new DBConnection(true)
   private[this] lazy val recordSt = db.conn.prepareCall("{CALL record_1gram(?,?,?,?,?)}")

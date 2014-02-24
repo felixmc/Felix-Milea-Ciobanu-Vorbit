@@ -1,4 +1,4 @@
-package com.felixmilea.vorbit.reddit.mining.actors
+package com.felixmilea.vorbit.actors
 
 import scala.collection.mutable.HashMap
 import akka.actor.ActorSelection

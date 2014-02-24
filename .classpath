@@ -5,8 +5,8 @@
 	<classpathentry kind="lib" path="C:/Users/Felix/dev/jansi-1.11.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/FelixMileaLibs"/>
 	<classpathentry kind="var" path="mysql jdbc driver"/>
-	<classpathentry kind="lib" path="C:/Users/Felix/dev/akka-2.2.3/lib/akka/akka-actor_2.10-2.2.3.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Felix/dev/akka-2.2.3/lib/akka/config-1.0.2.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Felix/dev/akka-2.2.3/lib/scala-library.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Felix/dev/akka-2.3.0-RC4/lib/scala-library.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Felix/dev/akka-2.3.0-RC4/lib/akka/config-1.2.0.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Felix/dev/akka-2.3.0-RC4/lib/akka/akka-actor_2.10-2.3.0-RC4.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

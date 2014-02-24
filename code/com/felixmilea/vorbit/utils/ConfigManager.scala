@@ -19,7 +19,11 @@ class ConfigManager(val configDir: String) extends Loggable {
     Debug(s"\t- Loading config file '$file'")
     val configName = file.getName().split("\\.")(0)
 
-    configValues += (configName -> JSON(Source.fromFile(file).mkString))
+    try {
+      configValues += (configName -> JSON(Source.fromFile(file).mkString))
+    } catch {
+      case je: JSONException => Error(s"JSON error while parsing file '$file'")
+    }
   })
 
   val miners = this("miners")

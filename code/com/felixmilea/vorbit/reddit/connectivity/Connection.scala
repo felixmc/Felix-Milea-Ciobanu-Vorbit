@@ -8,7 +8,7 @@ import java.io.InputStreamReader
 import java.net.UnknownHostException
 import com.felixmilea.vorbit.utils.Loggable
 
-class Connection(uri: String, params: ConnectionParameters = new ConnectionParameters(), isPost: Boolean = false, headers: Map[String, String] = Map())
+class Connection(val uri: String, params: ConnectionParameters = new ConnectionParameters(), isPost: Boolean = false, headers: Map[String, String] = Map())
   extends Loggable {
   import ConnectionUtils._
 

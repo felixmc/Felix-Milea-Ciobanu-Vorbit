@@ -4,34 +4,35 @@ import java.net.UnknownHostException
 import scala.util.parsing.json.JSONArray
 import com.felixmilea.vorbit.utils.JSON
 import com.felixmilea.vorbit.utils.Log
-import com.felixmilea.vorbit.data.RedditUserManager
 import com.felixmilea.vorbit.utils.Loggable
+import com.felixmilea.vorbit.posting.RedditUserManager
 
-class Client extends Loggable {
-  var session: Session = null
-  var user: RedditUser = null
+class Client(private[this] var user: RedditUser = null) extends Loggable {
 
-  def isAuthenticated = session != null && !session.isExpired
+  if (user != null) {
+    authenticate()
+  }
 
-  def authenticate(user: RedditUser): Boolean = {
-    this.user = user
+  def isAuthenticated = user != null && user.session != null && !user.session.isExpired
 
-    RedditUserManager.getSession(user.credential.username) match {
+  def authenticate(): Boolean = {
+    Option(user.session) match {
       case Some(sess) =>
-        session = sess
-
-        val me = getJSON("api/me.json")
-
-        if (me.length == 0) {
+        if (!isLoggedIn()) {
           return login()
         }
 
         return true
-      case None => {
-        login()
-      }
+      case None => login()
     }
   }
+
+  def authenticate(user: RedditUser): Boolean = {
+    this.user = user
+    this.authenticate()
+  }
+
+  def isLoggedIn(): Boolean = getJSON("api/me.json").length != 0
 
   private[this] def login(): Boolean = {
     val params = new ConnectionParameters
@@ -52,18 +53,17 @@ class Client extends Loggable {
     val success = errors.length == 0
 
     if (success) {
-      session = Session.parse(conn, json("data"))
-      user.session = session
+      user.session = Session.parse(conn, json("data"))
       RedditUserManager.persist(user)
     } else
-      clientError(s"VorbitBot authentication failed for client with username `${user.credential.username}`", errors)
+      throw new AuthenticationExcetion(user.credential.username)
 
     return success
   }
 
   def get(path: String): String = {
     val conn = createConn(path)
-    return conn.response
+    return checkErrors(conn)
   }
 
   def getJSON(path: String): JSON = JSON(get(path))
@@ -77,13 +77,13 @@ class Client extends Loggable {
 
     val headers = getAuthHeaders()
     val conn = new Connection(s"api/comment", params, true, headers)
-    val response = conn.response
+    val response = checkErrors(conn)
 
-    return conn.response
+    return response
   }
 
   private def getAuthHeaders(): Map[String, String] = {
-    if (session != null) Map(("X-Modhash", session.modhash), ("Cookie", s"reddit_session=${session.cookie}")) else Map[String, String]()
+    if (isAuthenticated) Map(("X-Modhash", user.session.modhash), ("Cookie", s"reddit_session=${user.session.cookie}")) else Map[String, String]()
   }
 
   private def createConn(path: String, post: Boolean = false): Connection = {
@@ -98,10 +98,24 @@ class Client extends Loggable {
     }
   }
 
-  def clientError(header: String, errors: JSON) {
-    Error(s"$header:")
-    for (errorIndex <- 0 until errors.length) {
-      Error(s"\t- ${errors(errorIndex)(0)}: ${errors(1)}")
+  private[this] def checkErrors(conn: Connection): String = {
+    val response = conn.response
+    val json = JSON(response).json
+
+    if (json.has("ratelimit")) {
+      throw new RateLimitException(json.ratelimit, user.credential.username)
+    } else {
+      for (e <- json.errors) {
+        if (e(0).toString == "USER_REQUIRED") {
+          throw new AuthorizationException(conn.uri)
+        }
+      }
     }
+
+    return response
   }
 }
+
+class RateLimitException(val time: Double, val username: String) extends RuntimeException(s"$username has been rate limited for $time seconds.")
+class AuthenticationExcetion(val username: String) extends RuntimeException(s"Authentication of client '$username' failed.")
+class AuthorizationException(val path: String) extends RuntimeException(s"You must be logged in to access /$path")

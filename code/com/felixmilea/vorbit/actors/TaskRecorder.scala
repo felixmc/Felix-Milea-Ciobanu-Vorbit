@@ -1,4 +1,4 @@
-package com.felixmilea.vorbit.reddit.mining.actors
+package com.felixmilea.vorbit.actors
 
 import com.felixmilea.vorbit.data.DBConnection
 import com.felixmilea.vorbit.utils.AppUtils

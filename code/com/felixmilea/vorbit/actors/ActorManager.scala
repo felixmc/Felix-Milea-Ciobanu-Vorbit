@@ -1,17 +1,15 @@
-package com.felixmilea.vorbit.reddit.mining.actors
+package com.felixmilea.vorbit.actors
 
 import java.util.Date
-import scala.concurrent.Promise
 import akka.actor.Props
 import akka.actor.Actor
 import akka.actor.ActorRef
-import com.felixmilea.vorbit.utils.AppUtils
 import com.felixmilea.vorbit.utils.Loggable
 
-class ActorManager(actors: Map[String, Props]) extends Actor with Loggable {
+class ActorManager(actors: Map[String, Props] = Map()) extends Actor with Loggable {
   import ActorManager._
 
-  private[this] lazy val children: Map[String, ActorRef] = actors.map(a => (a._1, context.actorOf(a._2, a._1)))
+  protected[this] lazy val children: Map[String, ActorRef] = actors.map(a => (a._1, context.actorOf(a._2, a._1)))
 
   override def preStart() { children }
 

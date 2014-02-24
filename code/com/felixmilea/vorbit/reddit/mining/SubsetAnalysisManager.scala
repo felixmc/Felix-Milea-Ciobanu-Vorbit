@@ -2,14 +2,15 @@ package com.felixmilea.vorbit.reddit.mining
 
 import akka.actor.Props
 import akka.routing.SmallestMailboxRouter
-import com.felixmilea.vorbit.reddit.mining.actors.TextUnitProcessor
-import com.felixmilea.vorbit.reddit.mining.actors.RedditCorpusRetriever
-import com.felixmilea.vorbit.reddit.mining.actors.SubsetNgramJoiner
-import com.felixmilea.vorbit.reddit.mining.actors.SubsetMiningCoordinator
-import com.felixmilea.vorbit.reddit.mining.actors.PostGramCache
-import com.felixmilea.vorbit.reddit.mining.actors.SubsetNgramAnalyzer
+import com.felixmilea.vorbit.actors.TextUnitProcessor
+import com.felixmilea.vorbit.actors.RedditCorpusRetriever
+import com.felixmilea.vorbit.actors.SubsetNgramJoiner
+import com.felixmilea.vorbit.actors.SubsetMiningCoordinator
+import com.felixmilea.vorbit.actors.PostGramCache
+import com.felixmilea.vorbit.actors.SubsetNgramAnalyzer
+import com.felixmilea.vorbit.actors.ActorSetManager
 
-class SubsetAnalysisManager extends MiningManager {
+class SubsetAnalysisManager extends ActorSetManager {
   import SubsetAnalysisManager._
 
   val name = "SubsetAnalysisManager"

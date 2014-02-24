@@ -1,7 +1,7 @@
 package com.felixmilea.vorbit.reddit.mining
 
 import com.felixmilea.vorbit.reddit.mining.config.MinerConfig
-import com.felixmilea.vorbit.reddit.mining.actors.RedditCorpusRetriever._
+import com.felixmilea.vorbit.actors.RedditCorpusRetriever._
 import com.felixmilea.vorbit.utils.AppUtils
 
 class SubsetMiner(dataset: Int, subsets: Tuple2[Int, Int], edition: Int) extends Miner {

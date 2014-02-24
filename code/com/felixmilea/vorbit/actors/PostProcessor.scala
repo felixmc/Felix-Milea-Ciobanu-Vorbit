@@ -1,20 +1,19 @@
-package com.felixmilea.vorbit.reddit.mining.actors
+package com.felixmilea.vorbit.actors
 
 import java.sql.PreparedStatement
-import com.felixmilea.vorbit.reddit.mining.actors.ManagedActor.WorkCommand
+import com.felixmilea.vorbit.actors.ManagedActor.WorkCommand
 import com.felixmilea.vorbit.reddit.models.Post
 import com.felixmilea.vorbit.reddit.models.Comment
 import com.felixmilea.vorbit.data.DBConnection
 import com.felixmilea.vorbit.reddit.models.RedditPost
 import com.felixmilea.vorbit.utils.AppUtils
-import com.felixmilea.vorbit.reddit.mining.actors.ManagedActor.MinerCommand
-import com.felixmilea.vorbit.reddit.mining.actors.TextUnitProcessor.RecordText
-import com.felixmilea.vorbit.reddit.mining.MiningManager
+import com.felixmilea.vorbit.actors.ManagedActor.MinerCommand
+import com.felixmilea.vorbit.actors.TextUnitProcessor.RecordText
 
 class PostProcessor extends ManagedActor {
   import PostProcessor._
 
-  private[this] lazy val processor = AppUtils.actor(self.path.parent.parent.child(MiningManager.ActorNames.textProcessor))
+  private[this] lazy val processor = AppUtils.actor(self.path.parent.parent.child(ActorSetManager.ActorNames.textProcessor))
   private[this] val db = new DBConnection(true)
 
   private[this] val existsStatement = db.conn.prepareStatement(s"SELECT * FROM `reddit_corpus` WHERE `reddit_id`=? AND `dataset`=? AND `subset`=? LIMIT 1")
@@ -23,32 +22,30 @@ class PostProcessor extends ManagedActor {
   private[this] val (parentsSubset, childrenSubset) = (AppUtils.config.persistence.data.subsets("parents"), AppUtils.config.persistence.data.subsets("children"))
 
   def doReceive = {
-    case MinerCommand(work, conf) => work match {
-      case ProcessPost(post) => {
-        val isPost = post.isInstanceOf[Post]
-        val dataset = AppUtils.config.persistence.data.datasets(conf.dataset)
-        val subset = if (isPost) parentsSubset else childrenSubset
-        val isNew = !hasPost(post.redditId, dataset, subset)
+    case ProcessPost(post) => {
+      val isPost = post.isInstanceOf[Post]
+      val dataset = AppUtils.config.persistence.data.datasets(conf.dataset)
+      val subset = if (isPost) parentsSubset else childrenSubset
+      val isNew = !hasPost(post.redditId, dataset, subset)
 
-        try {
-          if (isNew) {
-            val ps = prepareInsert(db, post, dataset, subset)
-            ps.executeUpdate()
-            db.conn.commit()
+      try {
+        if (isNew) {
+          val ps = prepareInsert(db, post, dataset, subset)
+          ps.executeUpdate()
+          db.conn.commit()
 
-            if (isPost) {
-              processor ! RecordText(post.asInstanceOf[Post].title, dataset, subset)
-              if (conf.task.parsePostContent) {
-                processor ! RecordText(post.content, dataset, subset)
-              }
-            } else {
-              processor ! RecordText(post.content, dataset, subset)
-            }
+          if (isPost) {
+            processor ! RecordText(post.asInstanceOf[Post].title, dataset, subset)
+            //              if (conf.task.parsePostContent) {
+            //                processor ! RecordText(post.content, dataset, subset)
+            //              }
+          } else {
+            processor ! RecordText(post.content, dataset, subset)
           }
-        } catch {
-          case t: Throwable => {
-            Error(s"\tAn error was encountered while attempting to store post `$post`: ${t.getMessage}")
-          }
+        }
+      } catch {
+        case t: Throwable => {
+          Error(s"\tAn error was encountered while attempting to store post `$post`: ${t.getMessage}")
         }
       }
     }

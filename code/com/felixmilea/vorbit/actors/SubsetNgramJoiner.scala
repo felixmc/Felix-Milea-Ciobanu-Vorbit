@@ -1,12 +1,10 @@
-package com.felixmilea.vorbit.reddit.mining.actors
+package com.felixmilea.vorbit.actors
 
-import scala.collection.mutable.HashMap
-import com.felixmilea.vorbit.data.DBConnection
 import com.felixmilea.vorbit.utils.AppUtils
+import com.felixmilea.vorbit.actors.PostGramCache._
+import com.felixmilea.vorbit.actors.TextUnitProcessor.GramSet
+import com.felixmilea.vorbit.actors.SubsetNgramAnalyzer.ParentChild
 import com.felixmilea.vorbit.reddit.mining.SubsetAnalysisManager
-import com.felixmilea.vorbit.reddit.mining.actors.PostGramCache._
-import com.felixmilea.vorbit.reddit.mining.actors.TextUnitProcessor.GramSet
-import com.felixmilea.vorbit.reddit.mining.actors.SubsetNgramAnalyzer.ParentChild
 
 class SubsetNgramJoiner extends ManagedActor {
   import SubsetNgramJoiner._

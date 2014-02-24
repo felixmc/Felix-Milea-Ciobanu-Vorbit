@@ -5,8 +5,9 @@ import com.felixmilea.vorbit.reddit.mining.config.MinerConfig
 import com.felixmilea.vorbit.reddit.mining.config.TaskConfig
 import com.felixmilea.vorbit.data.DBConnection
 import com.felixmilea.vorbit.utils.AppUtils
+import com.felixmilea.vorbit.actors.ActorSetManager
 
-class RedditMiner(config: MinerConfig, man: MiningManager) extends Miner {
+class RedditMiner(config: MinerConfig, man: ActorSetManager) extends Miner {
   val manager = man
 
   private[this] lazy val db = new DBConnection(true)

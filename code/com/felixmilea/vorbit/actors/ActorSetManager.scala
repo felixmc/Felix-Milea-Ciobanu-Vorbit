@@ -1,4 +1,4 @@
-package com.felixmilea.vorbit.reddit.mining
+package com.felixmilea.vorbit.actors
 
 import scala.concurrent.duration._
 import scala.concurrent.Await
@@ -6,13 +6,12 @@ import akka.actor.Props
 import akka.actor.ActorRef
 import akka.pattern.ask
 import akka.util.Timeout
-import com.felixmilea.vorbit.reddit.mining.actors.ActorManager
-import com.felixmilea.vorbit.reddit.mining.actors.ActorManager._
+import com.felixmilea.vorbit.actors.ActorManager._
 import com.felixmilea.vorbit.utils.AppUtils
 import com.felixmilea.vorbit.utils.MappedProps
 
-abstract class MiningManager(protected val minerCount: Int = 1) {
-  import MiningManager._
+abstract class ActorSetManager(protected val minerCount: Int = 1) {
+  import ActorSetManager._
 
   protected[this] val managedActors: Map[String, Props]
   protected[this] val name: String
@@ -34,7 +33,7 @@ abstract class MiningManager(protected val minerCount: Int = 1) {
   final def ping() = actorManager ! PingChildren()
 }
 
-object MiningManager {
+object ActorSetManager {
   object ActorNames {
     val downloader = "downloader"
     val taskRecorder = "taskRecorder"
