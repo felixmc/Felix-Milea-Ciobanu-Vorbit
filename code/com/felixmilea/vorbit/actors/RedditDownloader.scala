@@ -13,18 +13,17 @@ import com.felixmilea.vorbit.reddit.mining.config.CommentSort
 class RedditDownloader extends ManagedActor {
   import RedditDownloader._
 
-  private[this] lazy val downloader = AppUtils.actor(self.path.parent.parent.child(ActorSetManager.ActorNames.downloader))
   private[this] lazy val client = new Client
 
   def doReceive = {
-    case DownloadRequest(item, receiver) => item match {
+    case DownloadRequest(item, receiver, tag) => item match {
       case Listing(sub, sort, count, time, pages, after) => {
         val url = subredditUrl(sub, sort, count, time, after)
         try {
           val listing = client.getJSON(url)("data")("children")
-          receiver ! ListingResult(listing)
+          receiver ! ListingResult(listing, tag)
           if (pages > 0 && listing.length > 0) {
-            downloader ! DownloadRequest(Listing(sub, sort, count, time, pages - 1, listing(listing.length - 1)("data")("id")), receiver)
+            selfPool ! DownloadRequest(Listing(sub, sort, count, time, pages - 1, listing(listing.length - 1)("data")("id")), receiver)
           }
         } catch {
           case e: JSONException => {
@@ -36,7 +35,7 @@ class RedditDownloader extends ManagedActor {
         val url = s"comments/$id.json?sort=$sort"
         try {
           val data = client.getJSON(url)
-          receiver ! PostResult(data)
+          receiver ! PostResult(data, tag)
         } catch {
           case e: JSONException => {
             Error(s"Error while parsing or traversing JSON retrieved from '$url'")
@@ -54,12 +53,12 @@ class RedditDownloader extends ManagedActor {
 
 object RedditDownloader {
   trait DownloadResult
-  case class ListingResult(json: JSON) extends DownloadResult
-  case class PostResult(json: JSON) extends DownloadResult
+  case class ListingResult(json: JSON, tag: String) extends DownloadResult
+  case class PostResult(json: JSON, tag: String) extends DownloadResult
 
   trait Downloadable
   case class Listing(subreddit: String, sort: PostSort.PostSort, count: Int, time: String, pages: Int, after: String = "") extends Downloadable
   case class Post(redditId: String, sort: CommentSort.CommentSort) extends Downloadable
 
-  case class DownloadRequest(item: Downloadable, receiver: ActorSelection) extends WorkCommand
+  case class DownloadRequest(item: Downloadable, receiver: ActorSelection, tag: String = "") extends WorkCommand
 }

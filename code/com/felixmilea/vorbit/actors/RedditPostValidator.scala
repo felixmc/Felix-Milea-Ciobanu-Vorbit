@@ -18,19 +18,19 @@ class RedditPostValidator extends ManagedActor {
     case ValidateListingPosts(listing, validator, receiver) => {
       for (postJson <- listing.json.filter(p => p.data.stickied)) {
         val post = ModelParser.parsePost(postJson.data)
-        if (isValidPost(post, validator)) receiver ! post
+        if (isValidPost(post, validator)) receiver ! ValidationResult(post, "listing", listing.tag)
       }
     }
-    case ValidatePostResult(postJson, validator, receiver) => {
+    case ValidatePostResult(postResult, validator, receiver) => {
       var hasGoodChildren = false
-      val comments = postJson.json(1).data.children
+      val comments = postResult.json(1).data.children
 
       for (commentJSON <- comments) {
         if (commentJSON.kind.toString == "t1") {
           val comment = ModelParser.parseComment(commentJSON.data)
           if (isValidComment(comment, validator)) {
             hasGoodChildren = true
-            receiver ! comment
+            receiver ! ValidationResult(comment, "post", postResult.tag)
 
             //App.actor("DataSetManager") ! DataSetManager.PersistPost(comment, config.name)
             //          //          if (nesting >= 0 && !commentsNode(comIndex)("data")("replies")().get.isEmpty)
@@ -40,8 +40,8 @@ class RedditPostValidator extends ManagedActor {
       }
 
       if (hasGoodChildren) {
-        val post = ModelParser.parsePost(postJson.json(0).data.children(0).data)
-        receiver ! post
+        val post = ModelParser.parsePost(postResult.json(0).data.children(0).data)
+        receiver ! ValidationResult(post, "post", postResult.tag)
       }
     }
   }
@@ -78,6 +78,8 @@ class RedditPostValidator extends ManagedActor {
 object RedditPostValidator {
   case class ValidateListingPosts(listing: ListingResult, validator: PostValidator, receiver: ActorSelection) extends WorkCommand
   case class ValidatePostResult(post: PostResult, validator: CommentValidator, receiver: ActorSelection) extends WorkCommand
+
+  case class ValidationResult(post: RedditPost, source: String, tag: String = "")
 
   case class ValidationCriteria(minKarma: Int = 0, maxKarma: Int = 0, minAge: Int = 0, maxAge: Int = 0, minGild: Int = 0)
   case class PostValidator(postType: PostType.PostType, criteria: Seq[ValidationCriteria])

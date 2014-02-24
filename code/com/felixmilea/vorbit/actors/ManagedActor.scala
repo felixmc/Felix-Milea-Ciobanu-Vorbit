@@ -2,10 +2,9 @@ package com.felixmilea.vorbit.actors
 
 import scala.util.Random
 import akka.actor.Actor
+import akka.actor.ActorSelection
 import com.felixmilea.vorbit.utils.Loggable
 import com.felixmilea.vorbit.utils.AppUtils
-import com.felixmilea.vorbit.reddit.mining.config.ConfigState
-import com.felixmilea.vorbit.utils.JSON
 
 abstract class ManagedActor(protected[this] val inPool: Boolean = true) extends Actor with Loggable {
   import ActorManager._
@@ -14,9 +13,11 @@ abstract class ManagedActor(protected[this] val inPool: Boolean = true) extends 
   override protected[this] def wrapLog(message: String): String = s"${qualifiedName}: $message"
 
   protected[this] val selfPool = if (inPool) context.parent else self
+  protected[this] val selfSelection = AppUtils.actor(selfPool.path)
 
-  protected[this] def sibling(name: String): Any = {
+  protected[this] def sibling(name: String): ActorSelection = {
     val parent = if (inPool) self.path.parent.parent else self.path.parent
+    AppUtils.actor(parent.child(name))
   }
 
   final def receive = {

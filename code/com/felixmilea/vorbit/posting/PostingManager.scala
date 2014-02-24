@@ -8,9 +8,9 @@ import com.felixmilea.vorbit.actors.RedditDownloader
 
 class PostingManager extends ActorManager {
 
-  override protected[this] lazy val children = {
-    List("Posters" -> context.actorOf(BalancingPool(RedditUserManager.users.size).props(Props[Poster]), "Posters"))
-      .::("Downloaders" -> context.actorOf(BalancingPool(10).props(Props[RedditDownloader])))
+  override protected[this] lazy val actors = {
+    List("Posters" -> Props[Poster].withRouter(BalancingPool(RedditUserManager.users.size)))
+      .::("Downloaders" -> Props[RedditDownloader].withRouter(BalancingPool(10)))
   }.toMap
 
 }

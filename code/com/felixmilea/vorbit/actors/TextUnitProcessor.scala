@@ -7,11 +7,12 @@ import akka.actor.ActorSelection
 import com.felixmilea.vorbit.data.DBConnection
 import com.felixmilea.vorbit.analysis.TextUnitParser
 import com.felixmilea.vorbit.utils.AppUtils
+import com.felixmilea.vorbit.reddit.mining.RedditMiningManager
 
 class TextUnitProcessor extends ManagedActor {
   import TextUnitProcessor._
 
-  private[this] lazy val processor = AppUtils.actor(self.path.parent.parent.child(ActorSetManager.ActorNames.ngramProcessor))
+  private[this] lazy val processor = sibling(RedditMiningManager.Names.ngram)
 
   private[this] val db = new DBConnection(true)
   private[this] lazy val recordSt = db.conn.prepareCall("{CALL record_1gram(?,?,?,?,?)}")

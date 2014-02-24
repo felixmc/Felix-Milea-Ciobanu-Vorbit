@@ -6,9 +6,10 @@ import akka.actor.Actor
 import akka.actor.ActorRef
 import com.felixmilea.vorbit.utils.Loggable
 
-class ActorManager(actors: Map[String, Props] = Map()) extends Actor with Loggable {
+abstract class ActorManager extends Actor with Loggable {
   import ActorManager._
 
+  protected[this] val actors: Map[String, Props]
   protected[this] lazy val children: Map[String, ActorRef] = actors.map(a => (a._1, context.actorOf(a._2, a._1)))
 
   override def preStart() { children }

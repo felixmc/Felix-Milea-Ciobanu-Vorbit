@@ -5,7 +5,7 @@ import com.felixmilea.vorbit.data.DBConnection
 import com.felixmilea.vorbit.data.ResultSetIterator
 import com.felixmilea.vorbit.utils.AppUtils
 
-class RedditCorpusRetriever extends ManagedActor {
+class RedditCorpusRetriever(subsets: Tuple2[Int, Int]) extends ManagedActor {
   import RedditCorpusRetriever._
 
   private[this] lazy val db = {
@@ -16,8 +16,7 @@ class RedditCorpusRetriever extends ManagedActor {
   private[this] lazy val getPosts = db.conn.prepareStatement("SELECT `reddit_id`, `type`, `title`, `content` FROM `reddit_corpus` WHERE `dataset`=? AND `subset`=?")
   private[this] lazy val getChildren = db.conn.prepareStatement("SELECT `reddit_id`, `content` FROM `reddit_corpus` WHERE `dataset`=? AND `subset`=? AND `parent`=?")
 
-  // TODO: fix child subset hack
-  private[this] lazy val childSubset = AppUtils.config.persistence.data.subsets("children")
+  private[this] lazy val childSubset = subsets._2
 
   def doReceive = {
     case Request(item, receiver) => item match {

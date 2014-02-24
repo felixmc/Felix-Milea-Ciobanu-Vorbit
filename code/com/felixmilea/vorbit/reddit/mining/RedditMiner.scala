@@ -1,14 +1,14 @@
 package com.felixmilea.vorbit.reddit.mining
 
 import java.util.Date
+import akka.actor.ActorRef
 import com.felixmilea.vorbit.reddit.mining.config.MinerConfig
 import com.felixmilea.vorbit.reddit.mining.config.TaskConfig
 import com.felixmilea.vorbit.data.DBConnection
 import com.felixmilea.vorbit.utils.AppUtils
-import com.felixmilea.vorbit.actors.ActorSetManager
+import com.felixmilea.vorbit.utils.Loggable
 
-class RedditMiner(config: MinerConfig, man: ActorSetManager) extends Miner {
-  val manager = man
+class RedditMiner(config: MinerConfig, manager: ActorRef) extends Thread with Loggable {
 
   private[this] lazy val db = new DBConnection(true)
   db.conn.setAutoCommit(true)

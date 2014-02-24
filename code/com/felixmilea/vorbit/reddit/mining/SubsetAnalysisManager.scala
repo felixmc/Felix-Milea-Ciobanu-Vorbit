@@ -8,14 +8,13 @@ import com.felixmilea.vorbit.actors.SubsetNgramJoiner
 import com.felixmilea.vorbit.actors.SubsetMiningCoordinator
 import com.felixmilea.vorbit.actors.PostGramCache
 import com.felixmilea.vorbit.actors.SubsetNgramAnalyzer
-import com.felixmilea.vorbit.actors.ActorSetManager
+import com.felixmilea.vorbit.actors.ActorManager
 
-class SubsetAnalysisManager extends ActorSetManager {
+class SubsetAnalysisManager(dataset: Int, subsets: Tuple2[Int, Int], edition: Int) extends ActorManager {
   import SubsetAnalysisManager._
 
-  val name = "SubsetAnalysisManager"
-  val managedActors = Map(
-    (ActorNames.downloader -> Props[RedditCorpusRetriever].withRouter(SmallestMailboxRouter(10))),
+  override protected[this] lazy val actors = Map(
+    (ActorNames.downloader -> Props(new RedditCorpusRetriever(subsets)).withRouter(SmallestMailboxRouter(10))),
     (ActorNames.coordinator -> Props[SubsetMiningCoordinator].withRouter(SmallestMailboxRouter(20))),
     (ActorNames.textProcessor -> Props[TextUnitProcessor].withRouter(SmallestMailboxRouter(15))),
     (ActorNames.parentCache -> Props[PostGramCache]),
@@ -23,7 +22,6 @@ class SubsetAnalysisManager extends ActorSetManager {
     (ActorNames.analyzer -> Props[SubsetNgramAnalyzer].withRouter(SmallestMailboxRouter(20))) // last
     )
 
-  init()
 }
 
 object SubsetAnalysisManager {
