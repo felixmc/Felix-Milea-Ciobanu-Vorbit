@@ -27,6 +27,7 @@ object SymbolFriendlyStrategy extends TextUnitParserStrategy(
     (W("/") -> "slash"),
     (BD("\\$") -> "dollarSign"),
     (D(",") -> "numberComma"),
+    (D("\\.") -> "numberPeriod"),
     (AD("%") -> "percent"),
     (W("'") -> "apostrophe")),
   lowercase = true,

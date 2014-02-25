@@ -19,12 +19,9 @@ class PostProcessor extends ManagedActor {
   private[this] val existsStatement = db.conn.prepareStatement(s"SELECT * FROM `reddit_corpus` WHERE `reddit_id`=? AND `dataset`=? AND `subset`=? LIMIT 1")
   private[this] val insertStatement = db.conn.prepareStatement(s"INSERT INTO `reddit_corpus`(`reddit_id`, `parent`, `type`, `author`, `subreddit`, `title`, `content`, `children_count`, `ups`, `downs`, `gilded`, `date_posted`, `date_mined`, `dataset`, `subset`) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
 
-  private[this] val (parentsSubset, childrenSubset) = (AppUtils.config.persistence.data.subsets("parents"), AppUtils.config.persistence.data.subsets("children"))
-
   def doReceive = {
-    case ProcessPost(post, dataset, onNew) => {
+    case ProcessPost(post, dataset, subset, onNew) => {
       val isPost = post.isInstanceOf[Post]
-      val subset = if (isPost) parentsSubset else childrenSubset
       val isNew = !hasPost(post.redditId, dataset, subset)
 
       try {
@@ -92,5 +89,5 @@ class PostProcessor extends ManagedActor {
 }
 
 object PostProcessor {
-  case class ProcessPost(post: RedditPost, dataset: Int, onNew: Forward = null) extends WorkCommand
+  case class ProcessPost(post: RedditPost, dataset: Int, subset: Int, onNew: Forward = null) extends WorkCommand
 }

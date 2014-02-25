@@ -7,10 +7,10 @@ import com.felixmilea.vorbit.utils.AppUtils
 
 object CompositionTest extends App with Loggable {
 
-  val n = 3
+  val n = 1
   val count = 10
 
-  val (datasetId, subsetId, editionId) = (AppUtils.config.persistence.data.datasets("answerBot"),
+  val (datasetId, subsetId, editionId) = (AppUtils.config.persistence.data.datasets("maybeHumanBot"),
     AppUtils.config.persistence.data.subsets("children"), AppUtils.config.persistence.data.editions("symbolWords"))
 
   val ngrams = new NgramManager(n, datasetId, subsetId, editionId)

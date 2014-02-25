@@ -1,9 +1,10 @@
 package com.felixmilea.vorbit.composition
 
-import scala.collection.immutable.VectorBuilder
 import scala.util.Random
+import scala.collection.immutable.VectorBuilder
+import com.felixmilea.vorbit.utils.Loggable
 
-class NgramMarkovChain(ngrams: NgramManager) {
+class NgramMarkovChain(ngrams: NgramManager) extends Loggable {
   private[this] val chain = new VectorBuilder[Int]
 
   def generate(n: Int = ngrams.n): Seq[String] = generateRaw(n).map(id => ngrams.textUnits(id))
@@ -34,7 +35,14 @@ class NgramMarkovChain(ngrams: NgramManager) {
   def nextRandomState(key: List[Int]): List[Int] = {
     val set = ngrams.getSet(key.length + 1).filterKeys(k => k.startsWith(key))
     val max = set.map(kv => kv._2._1).sum
-    val prob = Random.nextInt(max)
+    val prob = try {
+      Random.nextInt(max)
+    } catch {
+      case t: Throwable => {
+        Error(t.getMessage)
+        0
+      }
+    }
     var cumSum = 0
 
     val nextState = set.find(state => {

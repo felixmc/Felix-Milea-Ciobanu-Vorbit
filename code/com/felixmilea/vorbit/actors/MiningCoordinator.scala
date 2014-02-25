@@ -18,6 +18,8 @@ class MiningCoordinator(manager: ActorRef, config: TaskConfig) extends ManagedAc
   private[this] lazy val postProcessor = sibling(RedditMiningManager.Names.post)
   private[this] lazy val textProcessor = sibling(RedditMiningManager.Names.text)
 
+  private[this] val (parentsSubset, childrenSubset) = (AppUtils.config.persistence.data.subsets("parents"), AppUtils.config.persistence.data.subsets("children"))
+
   def doReceive = {
     case l: ListingResult => {
       val criteria = config.task.targets(l.tag.toInt).postConstraints.map(ps => new ValidationCriteria(minKarma = ps.minKarma, maxAge = ps.maxAge))
@@ -32,7 +34,8 @@ class MiningCoordinator(manager: ActorRef, config: TaskConfig) extends ManagedAc
         downloader ! DownloadRequest(Post(post.redditId, config.task.commentSort), this.selfSelection, tag)
       }
       case "post" => {
-        postProcessor ! ProcessPost(post, dataset, Forward(RecordText(if (post.isInstanceOf[Post]) post.asInstanceOf[Post].title else post.content, dataset, tag.toInt), textProcessor))
+        val subset = if (post.isInstanceOf[Post]) parentsSubset else childrenSubset
+        postProcessor ! ProcessPost(post, dataset, subset, Forward(RecordText(if (post.isInstanceOf[Post]) post.asInstanceOf[Post].title else post.content, dataset, subset), textProcessor))
       }
     }
 
