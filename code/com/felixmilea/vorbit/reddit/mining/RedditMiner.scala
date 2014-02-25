@@ -9,12 +9,11 @@ import com.felixmilea.vorbit.utils.AppUtils
 import com.felixmilea.vorbit.utils.Loggable
 
 class RedditMiner(config: MinerConfig, manager: ActorRef) extends Thread with Loggable {
-
   private[this] lazy val db = new DBConnection(true)
   db.conn.setAutoCommit(true)
   private[this] lazy val getLastPerformed = db.conn.prepareCall("SELECT `last_performed` FROM `dataset_mining_tasks` WHERE `dataset` = ? AND `name` = ? LIMIT 1")
 
-  Info("Starting RedditMiner " + config.dataset)
+  Info("Starting RedditMiner '" + config.dataset + "'")
 
   override def run() {
     for (task <- config.tasks) {

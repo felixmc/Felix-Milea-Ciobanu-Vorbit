@@ -11,7 +11,7 @@ import com.felixmilea.vorbit.reddit.mining.RedditMiningManager
 import com.felixmilea.vorbit.utils.AppUtils
 import com.felixmilea.vorbit.reddit.models.Post
 
-class MiningCoordinator(manager: ActorRef, config: TaskConfig) extends ManagedActor {
+class MiningCoordinator(config: TaskConfig) extends ManagedActor {
   private[this] val dataset = AppUtils.config.persistence.data.datasets(config.dataset)
   private[this] lazy val downloader = sibling(RedditMiningManager.Names.download)
   private[this] lazy val validator = sibling(RedditMiningManager.Names.validator)
@@ -21,9 +21,13 @@ class MiningCoordinator(manager: ActorRef, config: TaskConfig) extends ManagedAc
   private[this] val (parentsSubset, childrenSubset) = (AppUtils.config.persistence.data.subsets("parents"), AppUtils.config.persistence.data.subsets("children"))
 
   def doReceive = {
-    case l: ListingResult => {
+    case l: PostListingResult => {
       val criteria = config.task.targets(l.tag.toInt).postConstraints.map(ps => new ValidationCriteria(minKarma = ps.minKarma, maxAge = ps.maxAge))
       validator ! ValidateListingPosts(l, PostValidator(config.task.postType, criteria), this.selfSelection)
+    }
+    case l: CommentListingResult => {
+      val criteria = config.task.targets(l.tag.toInt).commentConstraints.map(ps => new ValidationCriteria(minKarma = ps.minKarma, maxAge = ps.maxAge, minGild = ps.minGild))
+      validator ! ValidateCommentListing(l, CommentValidator(criteria), this.selfSelection)
     }
     case pr: PostResult => {
       val criteria = config.task.targets(pr.tag.toInt).commentConstraints.map(ps => new ValidationCriteria(minKarma = ps.minKarma, maxAge = ps.maxAge, minGild = ps.minGild))

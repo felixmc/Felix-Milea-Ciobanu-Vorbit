@@ -23,7 +23,6 @@ object MinerTest extends App with Loggable {
   }
 
   while (true) {
-    //    Thread.sleep(5000)
     readLine()
     manager ! PingChildren()
   }

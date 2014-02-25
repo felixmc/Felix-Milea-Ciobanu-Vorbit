@@ -22,6 +22,13 @@ class RedditPostValidator extends ManagedActor {
         if (isValid) receiver ! ValidationResult(post, "listing", listing.tag)
       }
     }
+    case ValidateCommentListing(listing, validator, receiver) => {
+      for (commentJson <- listing.json) {
+        val comment = ModelParser.parseComment(commentJson.data)
+        val isValid = isValidComment(comment, validator)
+        if (isValid) receiver ! ValidationResult(comment, "post", listing.tag)
+      }
+    }
     case ValidatePostResult(postResult, validator, receiver) => {
       var hasGoodChildren = false
       val comments = postResult.json(1).data.children
@@ -78,8 +85,9 @@ class RedditPostValidator extends ManagedActor {
 }
 
 object RedditPostValidator {
-  case class ValidateListingPosts(listing: ListingResult, validator: PostValidator, receiver: ActorSelection) extends WorkCommand
+  case class ValidateListingPosts(listing: PostListingResult, validator: PostValidator, receiver: ActorSelection) extends WorkCommand
   case class ValidatePostResult(post: PostResult, validator: CommentValidator, receiver: ActorSelection) extends WorkCommand
+  case class ValidateCommentListing(listing: CommentListingResult, validator: CommentValidator, receiver: ActorSelection) extends WorkCommand
 
   case class ValidationResult(post: RedditPost, source: String, tag: String = "")
 

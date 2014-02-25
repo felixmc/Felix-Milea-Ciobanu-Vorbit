@@ -2,7 +2,7 @@ package com.felixmilea.vorbit.composition
 
 import com.felixmilea.vorbit.utils.Loggable
 
-class CommentComposer(n: Int, dataset: Int, subset: Int, edition: Int) extends Loggable {
+class CommentComposer(val n: Int, val dataset: Int, val subset: Int, val edition: Int) extends Loggable {
   val ngrams = new NgramManager(n, dataset, subset, edition)
   val markovChain = new NgramMarkovChain(ngrams)
   val noSpaceChars = "?!.,:;"

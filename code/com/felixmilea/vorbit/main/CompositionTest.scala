@@ -7,7 +7,7 @@ import com.felixmilea.vorbit.utils.AppUtils
 
 object CompositionTest extends App with Loggable {
 
-  val n = 1
+  val n = 4
   val count = 10
 
   val (datasetId, subsetId, editionId) = (AppUtils.config.persistence.data.datasets("maybeHumanBot"),
