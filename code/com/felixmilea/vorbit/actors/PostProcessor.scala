@@ -8,6 +8,7 @@ import com.felixmilea.vorbit.data.DBConnection
 import com.felixmilea.vorbit.reddit.models.RedditPost
 import com.felixmilea.vorbit.actors.TextUnitProcessor.RecordText
 import com.felixmilea.vorbit.utils.AppUtils
+import akka.actor.ActorSelection
 
 class PostProcessor extends ManagedActor {
   import PostProcessor._

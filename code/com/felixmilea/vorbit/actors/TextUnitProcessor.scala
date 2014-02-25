@@ -4,10 +4,10 @@ import java.sql.CallableStatement
 import com.mysql.jdbc.MysqlDataTruncation
 import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException
 import akka.actor.ActorSelection
+import com.felixmilea.vorbit.reddit.mining.RedditMiningManager
 import com.felixmilea.vorbit.data.DBConnection
 import com.felixmilea.vorbit.analysis.TextUnitParser
 import com.felixmilea.vorbit.utils.AppUtils
-import com.felixmilea.vorbit.reddit.mining.RedditMiningManager
 
 class TextUnitProcessor extends ManagedActor {
   import TextUnitProcessor._

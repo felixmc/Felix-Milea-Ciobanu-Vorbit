@@ -14,6 +14,8 @@ class RedditMiner(config: MinerConfig, manager: ActorRef) extends Thread with Lo
   db.conn.setAutoCommit(true)
   private[this] lazy val getLastPerformed = db.conn.prepareCall("SELECT `last_performed` FROM `dataset_mining_tasks` WHERE `dataset` = ? AND `name` = ? LIMIT 1")
 
+  Info("Starting RedditMiner " + config.dataset)
+
   override def run() {
     for (task <- config.tasks) {
       getLastPerformed.setInt(1, AppUtils.config.persistence.data.datasets(config.dataset))

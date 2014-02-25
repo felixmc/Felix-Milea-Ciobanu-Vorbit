@@ -16,7 +16,7 @@ class ConfigManager(val configDir: String) extends Loggable {
   new File(configDir).listFiles(new FilenameFilter() {
     def accept(dir: File, name: String): Boolean = name.endsWith(configExt)
   }).foreach(file => {
-    Debug(s"\t- Loading config file '$file'")
+    Debug(s"   -- Loading config file '$file'")
     val configName = file.getName().split("\\.")(0)
 
     try {

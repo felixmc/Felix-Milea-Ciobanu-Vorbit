@@ -14,12 +14,14 @@ import com.felixmilea.vorbit.actors.RedditPostValidator
 class RedditMiningManager(minerCount: Int = 1) extends ActorManager {
   import RedditMiningManager._
 
+  protected[this] val name: String = "RedditMiningManager"
+
   override protected[this] lazy val actors = {
     List(Names.download -> BalancingPool(15 * minerCount).props(Props[RedditDownloader]))
       .::(Names.task -> Props[TaskRecorder])
       .::(Names.validator -> Props[RedditPostValidator].withRouter(BalancingPool(5 * minerCount)))
       .::(Names.post -> Props[PostProcessor].withRouter(BalancingPool(10 * minerCount)))
-      .::(Names.text -> Props[TextUnitProcessor].withRouter(BalancingPool(15 * minerCount)))
+      .::(Names.text -> BalancingPool(15 * minerCount).props(Props[TextUnitProcessor]))
       .::(Names.ngram -> Props[NgramProcessor].withRouter(BalancingPool(15 * minerCount)))
   }.toMap
 

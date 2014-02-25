@@ -16,9 +16,10 @@ class RedditPostValidator extends ManagedActor {
 
   def doReceive = {
     case ValidateListingPosts(listing, validator, receiver) => {
-      for (postJson <- listing.json.filter(p => p.data.stickied)) {
+      for (postJson <- listing.json.filterNot(p => p.data.stickied)) {
         val post = ModelParser.parsePost(postJson.data)
-        if (isValidPost(post, validator)) receiver ! ValidationResult(post, "listing", listing.tag)
+        val isValid = isValidPost(post, validator)
+        if (isValid) receiver ! ValidationResult(post, "listing", listing.tag)
       }
     }
     case ValidatePostResult(postResult, validator, receiver) => {
@@ -28,7 +29,8 @@ class RedditPostValidator extends ManagedActor {
       for (commentJSON <- comments) {
         if (commentJSON.kind.toString == "t1") {
           val comment = ModelParser.parseComment(commentJSON.data)
-          if (isValidComment(comment, validator)) {
+          val isGood = isValidComment(comment, validator)
+          if (isGood) {
             hasGoodChildren = true
             receiver ! ValidationResult(comment, "post", postResult.tag)
 
@@ -58,7 +60,7 @@ class RedditPostValidator extends ManagedActor {
 
   def isValidComment(comment: Comment, config: CommentValidator): Boolean = {
     for (crit <- config.criteria) {
-      val isValid = criteriaValidate(comment, crit) && (comment.gilded < crit.minGild)
+      val isValid = criteriaValidate(comment, crit) && (comment.gilded >= crit.minGild)
       if (!isValid) return isValid
     }
 

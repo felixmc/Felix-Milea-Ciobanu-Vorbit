@@ -98,13 +98,14 @@ class Client(private[this] var user: RedditUser = null) extends Loggable {
     }
   }
 
-  private[this] def checkErrors(conn: Connection): String = {
+  private[this] def checkErrors(conn: Connection, needsAuth: Boolean = false): String = {
     val response = conn.response
-    val json = JSON(response).json
+    val jsonraw = JSON(response)
+    val json = if (jsonraw.has("json")) jsonraw.json else jsonraw
 
     if (json.has("ratelimit")) {
       throw new RateLimitException(json.ratelimit, user.credential.username)
-    } else {
+    } else if (json.has("errors")) {
       for (e <- json.errors) {
         if (e(0).toString == "USER_REQUIRED") {
           throw new AuthorizationException(conn.uri)

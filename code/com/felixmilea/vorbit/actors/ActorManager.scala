@@ -5,14 +5,25 @@ import akka.actor.Props
 import akka.actor.Actor
 import akka.actor.ActorRef
 import com.felixmilea.vorbit.utils.Loggable
+import com.felixmilea.vorbit.utils.AppUtils
 
 abstract class ActorManager extends Actor with Loggable {
   import ActorManager._
 
+  protected[this] val name: String
   protected[this] val actors: Map[String, Props]
-  protected[this] lazy val children: Map[String, ActorRef] = actors.map(a => (a._1, context.actorOf(a._2, a._1)))
+  protected[this] lazy val children: Map[String, ActorRef] = {
+    actors.map(a => {
+      val actor = AppUtils.actorSystem.actorOf(a._2, a._1)
+      Debug(s"   -- Initializing actor ${actor.path}")
+      (a._1, actor)
+    })
+  }
 
-  override def preStart() { children }
+  override def preStart() {
+    Info(s"Starting $name")
+    children
+  }
 
   private[this] var pongs = -1
 

@@ -23,11 +23,11 @@ class RedditDownloader extends ManagedActor {
           val listing = client.getJSON(url)("data")("children")
           receiver ! ListingResult(listing, tag)
           if (pages > 0 && listing.length > 0) {
-            selfPool ! DownloadRequest(Listing(sub, sort, count, time, pages - 1, listing(listing.length - 1)("data")("id")), receiver)
+            selfPool ! DownloadRequest(Listing(sub, sort, count, time, pages - 1, listing(listing.length - 1)("data")("id")), receiver, tag)
           }
         } catch {
           case e: JSONException => {
-            Error(s"Error while parsing or traversing JSON retrieved from '$url'")
+            Error(s"Error while parsing or traversing JSON retrieved from '$url': " + e.getMessage)
           }
         }
       }

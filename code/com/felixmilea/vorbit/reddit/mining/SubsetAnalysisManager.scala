@@ -13,6 +13,8 @@ import com.felixmilea.vorbit.actors.ActorManager
 class SubsetAnalysisManager(dataset: Int, subsets: Tuple2[Int, Int], edition: Int) extends ActorManager {
   import SubsetAnalysisManager._
 
+  protected[this] val name: String = "SubsetAnalysisManager"
+
   override protected[this] lazy val actors = Map(
     (ActorNames.downloader -> Props(new RedditCorpusRetriever(subsets)).withRouter(SmallestMailboxRouter(10))),
     (ActorNames.coordinator -> Props[SubsetMiningCoordinator].withRouter(SmallestMailboxRouter(20))),

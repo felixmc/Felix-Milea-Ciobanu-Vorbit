@@ -4,9 +4,11 @@ import akka.actor.ActorRef
 import com.felixmilea.vorbit.actors.RedditDownloader._
 import com.felixmilea.vorbit.actors.RedditPostValidator._
 import com.felixmilea.vorbit.actors.PostProcessor._
+import com.felixmilea.vorbit.actors.TextUnitProcessor.RecordText
 import com.felixmilea.vorbit.reddit.mining.config.TaskConfig
 import com.felixmilea.vorbit.reddit.mining.RedditMiningManager
 import com.felixmilea.vorbit.utils.AppUtils
+import com.felixmilea.vorbit.reddit.models.Post
 
 class MiningCoordinator(manager: ActorRef, config: TaskConfig) extends ManagedActor {
   private[this] val dataset = AppUtils.config.persistence.data.datasets(config.dataset)
@@ -30,8 +32,10 @@ class MiningCoordinator(manager: ActorRef, config: TaskConfig) extends ManagedAc
       }
       case "post" => {
         postProcessor ! ProcessPost(post, dataset)
+        textProcessor ! RecordText(if (post.isInstanceOf[Post]) post.asInstanceOf[Post].title else post.content, dataset, tag.toInt)
       }
     }
+
   }
 
 }
