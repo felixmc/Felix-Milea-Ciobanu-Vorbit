@@ -1,6 +1,7 @@
 package com.felixmilea.vorbit.actors
 
 import akka.actor.ActorRef
+import com.felixmilea.vorbit.actors.ManagedActor.Forward
 import com.felixmilea.vorbit.actors.RedditDownloader._
 import com.felixmilea.vorbit.actors.RedditPostValidator._
 import com.felixmilea.vorbit.actors.PostProcessor._
@@ -31,8 +32,7 @@ class MiningCoordinator(manager: ActorRef, config: TaskConfig) extends ManagedAc
         downloader ! DownloadRequest(Post(post.redditId, config.task.commentSort), this.selfSelection, tag)
       }
       case "post" => {
-        postProcessor ! ProcessPost(post, dataset)
-        textProcessor ! RecordText(if (post.isInstanceOf[Post]) post.asInstanceOf[Post].title else post.content, dataset, tag.toInt)
+        postProcessor ! ProcessPost(post, dataset, Forward(RecordText(if (post.isInstanceOf[Post]) post.asInstanceOf[Post].title else post.content, dataset, tag.toInt), textProcessor))
       }
     }
 

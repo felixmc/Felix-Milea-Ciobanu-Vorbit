@@ -36,4 +36,5 @@ abstract class ManagedActor(protected[this] val inPool: Boolean = true) extends 
 object ManagedActor {
   case class Sleep(amount: Int = Random.nextInt(1000) + 200)
   trait WorkCommand
+  case class Forward(command: WorkCommand, receiver: ActorSelection)
 }

@@ -2,6 +2,7 @@ package com.felixmilea.vorbit.actors
 
 import java.sql.PreparedStatement
 import com.felixmilea.vorbit.actors.ManagedActor.WorkCommand
+import com.felixmilea.vorbit.actors.ManagedActor.Forward
 import com.felixmilea.vorbit.reddit.models.Post
 import com.felixmilea.vorbit.reddit.models.Comment
 import com.felixmilea.vorbit.data.DBConnection
@@ -21,7 +22,7 @@ class PostProcessor extends ManagedActor {
   private[this] val (parentsSubset, childrenSubset) = (AppUtils.config.persistence.data.subsets("parents"), AppUtils.config.persistence.data.subsets("children"))
 
   def doReceive = {
-    case ProcessPost(post, dataset) => {
+    case ProcessPost(post, dataset, onNew) => {
       val isPost = post.isInstanceOf[Post]
       val subset = if (isPost) parentsSubset else childrenSubset
       val isNew = !hasPost(post.redditId, dataset, subset)
@@ -31,6 +32,8 @@ class PostProcessor extends ManagedActor {
           val ps = prepareInsert(db, post, dataset, subset)
           ps.executeUpdate()
           db.conn.commit()
+          if (onNew != null)
+            onNew.receiver ! onNew.command
         }
       } catch {
         case t: Throwable => {
@@ -89,5 +92,5 @@ class PostProcessor extends ManagedActor {
 }
 
 object PostProcessor {
-  case class ProcessPost(post: RedditPost, dataset: Int) extends WorkCommand
+  case class ProcessPost(post: RedditPost, dataset: Int, onNew: Forward = null) extends WorkCommand
 }

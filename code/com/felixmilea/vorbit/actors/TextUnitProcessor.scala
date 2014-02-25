@@ -3,7 +3,9 @@ package com.felixmilea.vorbit.actors
 import java.sql.CallableStatement
 import com.mysql.jdbc.MysqlDataTruncation
 import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException
+import com.mysql.jdbc.exceptions.jdbc4.MySQLTransactionRollbackException
 import akka.actor.ActorSelection
+import com.felixmilea.vorbit.actors.ManagedActor.WorkCommand
 import com.felixmilea.vorbit.reddit.mining.RedditMiningManager
 import com.felixmilea.vorbit.data.DBConnection
 import com.felixmilea.vorbit.analysis.TextUnitParser
@@ -59,9 +61,14 @@ class TextUnitProcessor extends ManagedActor {
 
       return statement.getInt(5)
     } catch {
-      case msqlicve: MySQLIntegrityConstraintViolationException => {
-        Error(s"Duplicate 1gram: $gram\t${msqlicve.getMessage}")
+      case icve: MySQLIntegrityConstraintViolationException => {
+        Error(s"Duplicate 1gram: $gram\t${icve.getMessage}")
         Thread.sleep(500)
+        processNgram(statement, gram, dataset, subset)
+      }
+      case tre: MySQLTransactionRollbackException => {
+        Warning("insert deadlock..will try again in 1000ms")
+        Thread.sleep(1000)
         processNgram(statement, gram, dataset, subset)
       }
       case mdt: MysqlDataTruncation => {
@@ -73,7 +80,7 @@ class TextUnitProcessor extends ManagedActor {
 }
 
 object TextUnitProcessor {
-  case class RecordText(text: String, dataset: Int, subset: Int)
-  case class RetrieveText(text: String, dataset: Int, subset: Int, id: String, receiver: ActorSelection)
+  case class RecordText(text: String, dataset: Int, subset: Int) extends WorkCommand
+  case class RetrieveText(text: String, dataset: Int, subset: Int, id: String, receiver: ActorSelection) extends WorkCommand
   case class GramSet(dataset: Int, edition: Int, subset: Int, id: String, data: Seq[Int])
 }
