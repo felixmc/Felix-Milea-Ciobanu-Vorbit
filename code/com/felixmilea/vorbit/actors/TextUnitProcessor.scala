@@ -1,6 +1,7 @@
 package com.felixmilea.vorbit.actors
 
 import java.sql.CallableStatement
+import java.sql.SQLException
 import com.mysql.jdbc.MysqlDataTruncation
 import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException
 import com.mysql.jdbc.exceptions.jdbc4.MySQLTransactionRollbackException
@@ -74,6 +75,11 @@ class TextUnitProcessor extends ManagedActor {
       case mdt: MysqlDataTruncation => {
         Error(s"1gram too long (${gram.length} chars): $gram")
         return -1
+      }
+      case sqle: SQLException => {
+        Error("SQL error occurred..will try again in 1000ms: " + sqle.getMessage)
+        Thread.sleep(1000)
+        processNgram(statement, gram, dataset, subset)
       }
     }
 
