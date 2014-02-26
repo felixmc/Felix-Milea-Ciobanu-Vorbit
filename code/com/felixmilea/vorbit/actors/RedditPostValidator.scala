@@ -66,6 +66,7 @@ class RedditPostValidator extends ManagedActor {
   }
 
   def isValidComment(comment: Comment, config: CommentValidator): Boolean = {
+    if (comment.content == "[deleted]") return false
     for (crit <- config.criteria) {
       val isValid = criteriaValidate(comment, crit) && (comment.gilded >= crit.minGild)
       if (!isValid) return isValid
