@@ -2,14 +2,21 @@ package com.felixmilea.vorbit.composition
 
 import com.felixmilea.vorbit.utils.Loggable
 
-class CommentComposer(val n: Int, val dataset: Int, val subset: Int, val edition: Int) extends Loggable {
-  val ngrams = new NgramManager(n, dataset, subset, edition)
-  val markovChain = new NgramMarkovChain(ngrams)
-  val noSpaceChars = "?!.,:;"
+class CommentComposer(private[this] val ngrams: NgramManager) extends Loggable {
 
-  def compose(): String = {
+  def this(n: Int, dataset: Int, subset: Int, edition: Int) = {
+    this(new NgramManager(n, dataset, subset, edition))
+  }
+
+  val n = ngrams.n
+
+  private[this] val markovChain = new NgramMarkovChain(ngrams)
+  private[this] val noSpaceChars = "?!.,:;"
+  private[this] val whiteSpace = "[\\s]*"
+
+  def compose(cn: Int = ngrams.n): String = {
     val sb = new StringBuilder
-    val units = markovChain.generate(n)
+    val units = markovChain.generate(cn)
 
     for (i <- 0 until units.length) {
       sb ++= units(i).replace("NL", "  ")
@@ -18,7 +25,12 @@ class CommentComposer(val n: Int, val dataset: Int, val subset: Int, val edition
       }
     }
 
-    sb.toString
+    val result = sb.toString.replaceAll("’", "'")
+
+    if (result.matches(whiteSpace) || result == "deleted")
+      return compose(cn)
+
+    return result
   }
 
 }

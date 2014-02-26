@@ -1,6 +1,6 @@
 package com.felixmilea.vorbit.reddit.models
 
-abstract class RedditThing(val redditId: String)
+abstract class RedditThing(val redditId: String, val thingType: RedditThing.TypeId.TypeId)
 
 object RedditThing {
   object TypeId extends Enumeration {

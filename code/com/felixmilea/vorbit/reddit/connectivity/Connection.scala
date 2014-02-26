@@ -6,6 +6,8 @@ import java.net.HttpURLConnection
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.net.UnknownHostException
+import java.net.Proxy
+import java.net.InetSocketAddress
 import com.felixmilea.vorbit.utils.Loggable
 
 class Connection(val uri: String, params: ConnectionParameters = new ConnectionParameters(), isPost: Boolean = false, headers: Map[String, String] = Map())
@@ -15,9 +17,14 @@ class Connection(val uri: String, params: ConnectionParameters = new ConnectionP
   private val data = params.toString
   private val query = if (!isPost && !data.isEmpty) if (uri.contains('?')) s"&$data" else s"?$data" else ""
 
-  private val conn: HttpURLConnection = URL(uri + query).openConnection().asInstanceOf[HttpURLConnection]
+  private val useProxy = true
 
-  //  Warning(conn.getURL().toString)
+  private val conn: HttpURLConnection = {
+    if (useProxy) {
+      val proxy = new Proxy(Proxy.Type.SOCKS, new InetSocketAddress("localhost", 9050))
+      URL(uri + query).openConnection(proxy).asInstanceOf[HttpURLConnection]
+    } else URL(uri + query).openConnection().asInstanceOf[HttpURLConnection]
+  }
 
   private var resp: String = null
 

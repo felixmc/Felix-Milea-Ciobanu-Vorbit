@@ -10,27 +10,29 @@ import com.felixmilea.vorbit.utils.Loggable
 import com.felixmilea.vorbit.utils.JSON
 import com.felixmilea.vorbit.utils.AppUtils
 
-class PostingTask(posterName: String, config: JSON) extends Thread with Loggable {
-  private[this] val coordinator = AppUtils.actorSystem.actorOf(Props(new PostingCoordinator(config)).withRouter(BalancingPool(20)), config.name)
+class PostingTask(config: JSON, taskId: Int) extends Thread with Loggable {
+  private[this] val task = config.tasks(taskId)
+
+  private[this] val coordinator = AppUtils.actorSystem.actorOf(Props(new PostingCoordinator(config, task)).withRouter(BalancingPool(20)), config.name + "-" + task.name)
   private[this] val coordinatorSel = AppUtils.actor(coordinator.path)
   private[this] val downloader = AppUtils.actor(AppUtils.actorSystem.child(PostingManager.Names.download))
 
   override def run() {
     do {
-      Info(s"Starting reddit poster '$posterName/${config.name}'")
-      for (targetId <- 0 until config.task.targets.length) {
-        val target = config.task.targets(targetId)
-        for (unit <- target.units) {
-          val postSort = PostSort.withName(config.task.postSort)
-          downloader ! DownloadRequest(Listing(unit, postSort, config.task.postLimit, config.task.time, config.task.postListings), coordinatorSel, targetId.toString)
+      Info(s"Starting posting task '${config.name}/${task.name}'")
+      for (targetId <- 0 until task.targets.length) {
+        val target = task.targets(targetId)
+        for (sub <- target.subreddits) {
+          val postSort = PostSort.withName(task.postSort)
+          downloader ! DownloadRequest(Listing(sub, postSort, task.postLimit, task.time, task.postListings), coordinatorSel, targetId.toString)
         }
       }
 
-      if (config.task.recurrence != 0) {
-        Debug(s"   -- Posting task ${config.dataset}/${config.task.name} queued and will requeue in ${config.task.recurrence}ms")
-        Thread.sleep(config.recurrence.toInt)
+      if (task.recurrence != 0) {
+        Debug(s"   -- Posting task ${config.name}/${task.name} queued and will requeue in ${task.recurrence.toInt}ms")
+        Thread.sleep(task.recurrence.toInt)
       } else {
-        Debug(s"   -- Posting task ${config.dataset}/${config.task.name} queued")
+        Debug(s"   -- Posting task ${config.name}/${task.name} queued")
       }
     } while (config.recurrence != 0)
   }

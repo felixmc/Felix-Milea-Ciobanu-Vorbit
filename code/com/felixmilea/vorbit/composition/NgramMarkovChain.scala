@@ -16,8 +16,6 @@ class NgramMarkovChain(ngrams: NgramManager) extends Loggable {
     var current = List(ngrams.nullId)
     var next = nextRandomState(trim(current, n))
 
-    //    println("start: " + current)
-
     while (next.last != ngrams.nullId) {
       current = next
       chain += current.last
@@ -52,8 +50,6 @@ class NgramMarkovChain(ngrams: NgramManager) extends Loggable {
       case Some(state) => state._1
       case None => List(ngrams.nullId)
     }
-
-    //    println("next: " + nextState + " with prob of " + ((prob + 1) / max.toDouble * 100).round + "%")
 
     return nextState
   }

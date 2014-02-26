@@ -7,34 +7,37 @@ import com.felixmilea.vorbit.reddit.connectivity.Session
 import com.felixmilea.vorbit.reddit.connectivity.RedditUser
 import com.felixmilea.vorbit.reddit.connectivity.Credential
 import com.felixmilea.vorbit.data.ResultSetIterator
+import scala.util.Random
 
 object RedditUserManager {
   private[this] val users_table = "reddit_accounts"
   private[this] lazy val db: DBConnection = new DBConnection(true)
   private[this] lazy val insertStatement = db.conn.prepareStatement(s"INSERT INTO `$users_table`(`password`, `modhash`, `cookie`, `expiration_date`, `username`, `date_created`) VALUES (?,?,?,?,?,?)")
   private[this] lazy val updateStatement = db.conn.prepareStatement(s"UPDATE `$users_table` SET `password`=?,`modhash`=?,`cookie`=?,`expiration_date`=? WHERE `username` =?")
-  private[this] lazy val selectStatement = db.conn.prepareStatement(s"SELECT * FROM `$users_table`")
+  private[this] lazy val selectStatement = db.conn.prepareStatement(s"SELECT * FROM `$users_table` WHERE `active`=1")
 
-  lazy val users = {
-    ResultSetIterator(selectStatement.executeQuery()).map(resultSet => {
+  lazy val (usersMap, userList) = {
+    val users = ResultSetIterator(selectStatement.executeQuery()).map(resultSet => {
       val credential = new Credential(resultSet.getString("username"), resultSet.getString("password"))
-      val session = new Session(resultSet.getString("modhash"), resultSet.getString("modhash"), resultSet.getDate("expiration_date"))
-      credential.username -> new RedditUser(credential, session)
-    }).toMap
+      val session = new Session(resultSet.getString("modhash"), resultSet.getString("cookie"), resultSet.getDate("expiration_date"))
+      credential.username -> new RedditUser(credential, session, resultSet.getInt("id"))
+    }).toList
+
+    (users.toMap, Random.shuffle(users.map(u => u._2)))
   }
 
   private[this] var nextIt = 0
 
-  def grabNext(): RedditUser = {
-    val next = users(users.keys.toList(nextIt))
-    nextIt = (nextIt + 1) % users.size
+  def grabNext(): RedditUser = this.synchronized {
+    val next = userList(nextIt)
+    nextIt = (nextIt + 1) % userList.size
     return next
   }
 
-  def getUser(username: String): Option[RedditUser] = Option(users.getOrElse(username, null))
+  def getUser(username: String): Option[RedditUser] = Option(usersMap.getOrElse(username, null))
 
   def addSession(username: String, session: Session) {
-    val user = users.getOrElse(username, null)
+    val user = usersMap.getOrElse(username, null)
     if (user != null) {
       user.session = session
       persist(user)
@@ -42,7 +45,7 @@ object RedditUserManager {
   }
 
   def getSession(username: String): Option[Session] = {
-    val user = users.getOrElse(username, null)
+    val user = usersMap.getOrElse(username, null)
     if (user != null) {
       if (user.hasValidSession) Some(user.session)
       else None
@@ -50,7 +53,7 @@ object RedditUserManager {
   }
 
   def persist(user: RedditUser) {
-    val isNew = !users.contains(user.credential.username)
+    val isNew = !usersMap.contains(user.credential.username)
     val ps = if (isNew) insertStatement else updateStatement
 
     ps.setString(1, user.credential.password)

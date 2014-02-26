@@ -3,6 +3,7 @@ package com.felixmilea.vorbit.utils
 import com.felixmilea.vorbit.reddit.mining.MinerConfigParser
 import com.felixmilea.vorbit.reddit.mining.config.MinerConfig
 import com.felixmilea.vorbit.data.DBConnection
+import com.felixmilea.vorbit.data.ResultSetIterator
 
 class ConfigPersistence(config: ConfigManager) {
   private[this] val db = new DBConnection(true)
@@ -11,7 +12,7 @@ class ConfigPersistence(config: ConfigManager) {
   private[this] lazy val createEdition = db.conn.prepareCall("{CALL create_edition(?,?)}")
   private[this] lazy val createSubset = db.conn.prepareCall("{CALL create_subset(?,?)}")
   private[this] lazy val createDataset = db.conn.prepareCall("{CALL create_dataset(?,?)}")
-  private[this] lazy val getDataset = db.conn.prepareStatement("SELECT `id` FROM `datasets` WHERE `name`=? LIMIT 1")
+  private[this] lazy val getDatasets = db.conn.prepareStatement("SELECT * FROM `datasets`")
   private[this] lazy val createMiningTask = db.conn.prepareCall("{CALL create_mining_task(?, ?)}")
 
   val data: DataConfig = {
@@ -35,7 +36,13 @@ class ConfigPersistence(config: ConfigManager) {
       name -> createEdition.getInt(2)
     }).toMap
 
-    val datasets = config.miners.map(mc => (mc.dataset, registerMiner(mc))).toMap
+    val datasets = {
+      ResultSetIterator(getDatasets.executeQuery()).map(r => {
+        r.getString("name") -> r.getInt("id")
+      }).toMap
+    }
+
+    config.miners.filterNot(mc => datasets.contains(mc.dataset)).foreach(mc => (mc.dataset, registerMiner(mc)))
 
     db.conn.close()
 
@@ -43,27 +50,20 @@ class ConfigPersistence(config: ConfigManager) {
   }
 
   private[this] def registerMiner(miner: MinerConfig): Int = {
-    getDataset.setString(1, miner.dataset)
-    val rows = getDataset.executeQuery()
+    // create dataset
+    createDataset.setString(1, miner.dataset)
+    createDataset.registerOutParameter(2, java.sql.Types.INTEGER)
+    createDataset.execute()
+    val datasetId = createDataset.getInt(2)
 
-    if (rows.next()) {
-      rows.getInt("id")
-    } else {
-      // create dataset
-      createDataset.setString(1, miner.dataset)
-      createDataset.registerOutParameter(2, java.sql.Types.INTEGER)
-      createDataset.execute()
-      val datasetId = createDataset.getInt(2)
+    // register tasks
+    miner.tasks.foreach(task => {
+      createMiningTask.setInt(1, datasetId)
+      createMiningTask.setString(2, task.name)
+      createMiningTask.execute()
+    })
 
-      // register tasks
-      miner.tasks.foreach(task => {
-        createMiningTask.setInt(1, datasetId)
-        createMiningTask.setString(2, task.name)
-        createMiningTask.execute()
-      })
-
-      datasetId
-    }
+    datasetId
   }
 
 }

@@ -14,10 +14,10 @@ import akka.actor.ActorSelection
 class PostProcessor extends ManagedActor {
   import PostProcessor._
 
-  private[this] val db = new DBConnection(true)
+  private[this] lazy val db = new DBConnection(true)
 
-  private[this] val existsStatement = db.conn.prepareStatement(s"SELECT * FROM `reddit_corpus` WHERE `reddit_id`=? AND `dataset`=? AND `subset`=? LIMIT 1")
-  private[this] val insertStatement = db.conn.prepareStatement(s"INSERT INTO `reddit_corpus`(`reddit_id`, `parent`, `type`, `author`, `subreddit`, `title`, `content`, `children_count`, `ups`, `downs`, `gilded`, `date_posted`, `date_mined`, `dataset`, `subset`) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
+  private[this] lazy val existsStatement = db.conn.prepareStatement(s"SELECT * FROM `reddit_corpus` WHERE `reddit_id`=? AND `dataset`=? AND `subset`=? LIMIT 1")
+  private[this] lazy val insertStatement = db.conn.prepareStatement(s"INSERT INTO `reddit_corpus`(`reddit_id`, `parent`, `type`, `author`, `subreddit`, `title`, `content`, `children_count`, `ups`, `downs`, `gilded`, `date_posted`, `date_mined`, `dataset`, `subset`) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
 
   def doReceive = {
     case ProcessPost(post, dataset, subset, onNew) => {
@@ -40,7 +40,7 @@ class PostProcessor extends ManagedActor {
     }
   }
 
-  def hasPost(redditId: String, dataset: Int, subset: Int): Boolean = {
+  private[this] def hasPost(redditId: String, dataset: Int, subset: Int): Boolean = {
     existsStatement.setString(1, redditId)
     existsStatement.setInt(2, dataset)
     existsStatement.setInt(3, subset)
@@ -50,7 +50,7 @@ class PostProcessor extends ManagedActor {
     return hasPost
   }
 
-  private def prepareInsert(db: DBConnection, post: RedditPost, dataset: Int, subset: Int): PreparedStatement = {
+  private[this] def prepareInsert(db: DBConnection, post: RedditPost, dataset: Int, subset: Int): PreparedStatement = {
     val isComment = post.isInstanceOf[Comment]
 
     insertStatement.setString(1, post.redditId)
@@ -72,7 +72,7 @@ class PostProcessor extends ManagedActor {
     return insertStatement
   }
 
-  private def update(db: DBConnection, dataSet: String, post: RedditPost): PreparedStatement = {
+  private[this] def update(db: DBConnection, dataSet: String, post: RedditPost): PreparedStatement = {
     val ps = db.conn.prepareStatement(s"UPDATE `reddit_corpus` SET `children_count`=?,`ups`=?,`downs`=?,`gilded`=?,`date_mined`=? WHERE `reddit_id`=?")
     val isComment = post.isInstanceOf[Comment]
 

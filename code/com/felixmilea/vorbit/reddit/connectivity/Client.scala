@@ -9,56 +9,49 @@ import com.felixmilea.vorbit.posting.RedditUserManager
 
 class Client(private[this] var user: RedditUser = null) extends Loggable {
 
-  if (user != null) {
-    authenticate()
+  if (user != null) authenticate()
+
+  private[this] var meCache: JSON = null
+
+  def me: JSON = {
+    meCache = getJSON("api/me.json")
+    return meCache
   }
 
-  def isAuthenticated = user != null && user.session != null && !user.session.isExpired
+  def hasMail: Boolean = if (meCache == null) me.data.has_mail else meCache.data.has_mail
+  def commentKarma: Int = if (meCache == null) me.data.comment_karma else meCache.data.comment_karma
 
-  def authenticate(): Boolean = {
-    Option(user.session) match {
-      case Some(sess) =>
-        if (!isLoggedIn()) {
-          return login()
-        }
+  def getUser: RedditUser = user
+  def hasValidCredentials = user != null && user.session != null && !user.session.isExpired
+  def isLoggedIn(): Boolean = hasValidCredentials && me.length != 0
 
-        return true
-      case None => login()
-    }
-  }
-
+  def authenticate(): Boolean = tryLogin()
   def authenticate(user: RedditUser): Boolean = {
     this.user = user
     this.authenticate()
   }
 
-  def isLoggedIn(): Boolean = getJSON("api/me.json").length != 0
+  private[this] def tryLogin(): Boolean = return if (!isLoggedIn()) login() else true
 
   private[this] def login(): Boolean = {
     val params = new ConnectionParameters
-
     params ++= Seq(("user" -> user.credential.username), ("passwd" -> user.credential.password), ("rem" -> "true"))
 
-    val conn = try {
-      new Connection(Nodes.login, params, true)
-    } catch {
-      case uhe: UnknownHostException =>
-        Error("VorbitBot encountered an error while connecting to host: " + uhe)
-        null
-    }
+    val conn = new Connection(Nodes.login, params, true)
 
-    val json = JSON(conn.response).json
+    val response = checkErrors(conn)
+    val json = JSON(response).json
 
-    val errors = json.errors
-    val success = errors.length == 0
+    val success = json.errors.length == 0
 
     if (success) {
       user.session = Session.parse(conn, json("data"))
       RedditUserManager.persist(user)
-    } else
+      return isLoggedIn()
+    } else {
+      Error(response)
       throw new AuthenticationExcetion(user.credential.username)
-
-    return success
+    }
   }
 
   def get(path: String): String = {
@@ -69,8 +62,9 @@ class Client(private[this] var user: RedditUser = null) extends Loggable {
   def getJSON(path: String): JSON = JSON(get(path))
 
   def comment(thingId: String, text: String): String = {
-    val params = new ConnectionParameters()
+    tryLogin()
 
+    val params = new ConnectionParameters()
     params += ("api_type" -> "json")
     params += ("text" -> text)
     params += ("thing_id" -> thingId)
@@ -82,21 +76,11 @@ class Client(private[this] var user: RedditUser = null) extends Loggable {
     return response
   }
 
-  private def getAuthHeaders(): Map[String, String] = {
-    if (isAuthenticated) Map(("X-Modhash", user.session.modhash), ("Cookie", s"reddit_session=${user.session.cookie}")) else Map[String, String]()
-  }
+  private[this] def getAuthHeaders(): Map[String, String] =
+    if (hasValidCredentials) Map(("X-Modhash", user.session.modhash), ("Cookie", s"reddit_session=${user.session.cookie}"))
+    else Map[String, String]()
 
-  private def createConn(path: String, post: Boolean = false): Connection = {
-    val sessionHeaders = getAuthHeaders()
-
-    return try {
-      new Connection(path, isPost = post, headers = sessionHeaders)
-    } catch {
-      case uhe: UnknownHostException =>
-        Error("VorbitBot encountered an error while connecting to host: " + uhe)
-        null
-    }
-  }
+  private[this] def createConn(path: String, post: Boolean = false): Connection = new Connection(path, isPost = post, headers = getAuthHeaders())
 
   private[this] def checkErrors(conn: Connection, needsAuth: Boolean = false): String = {
     val response = conn.response
@@ -104,11 +88,22 @@ class Client(private[this] var user: RedditUser = null) extends Loggable {
     val json = if (jsonraw.has("json")) jsonraw.json else jsonraw
 
     if (json.has("ratelimit")) {
-      throw new RateLimitException(json.ratelimit, user.credential.username)
+      throw new RateLimitException(user.credential.username, json.ratelimit)
     } else if (json.has("errors")) {
       for (e <- json.errors) {
-        if (e(0).toString == "USER_REQUIRED") {
-          throw new AuthorizationException(conn.uri)
+        val header = e(0).toString
+        lazy val message = e(1).toString
+
+        header match {
+          case "RATELIMIT" => {
+            val mins = message.split("try again in ")(1).split(" ")(0).toInt
+            throw new RateLimitException(user.credential.username, mins * 60)
+          }
+          case "TOO_OLD" => throw new TooOldException(conn.uri)
+          case "USER_REQUIRED" => throw new AuthorizationException(conn.uri)
+          case "WRONG_PASSWORD" => throw new WrongPassword(user.credential)
+          case "DELETED_LINK" => throw new DeletedLinkException(conn.uri)
+          case _ => Warning(s"Unexpected Reddit Client Error: '$header: $message'")
         }
       }
     }
@@ -117,6 +112,11 @@ class Client(private[this] var user: RedditUser = null) extends Loggable {
   }
 }
 
-class RateLimitException(val time: Double, val username: String) extends RuntimeException(s"$username has been rate limited for $time seconds.")
-class AuthenticationExcetion(val username: String) extends RuntimeException(s"Authentication of client '$username' failed.")
-class AuthorizationException(val path: String) extends RuntimeException(s"You must be logged in to access /$path")
+class RateLimitException(val username: String, val time: Double) extends RedditClientException(s"$username has been rate limited for $time seconds.")
+class AuthenticationExcetion(val username: String, cause: String = "unknown cause") extends RedditClientException(s"Authentication of client with user '$username' failed due to $cause.")
+class WrongPassword(cred: Credential) extends AuthenticationExcetion(cred.username, s"bad password '${cred.password}'")
+class AuthorizationException(val path: String) extends RedditClientException(s"You must be logged in to access /$path")
+class TooOldException(val path: String) extends RedditClientException(s"The following content is too old to interact with: /$path")
+class NoTextException(val path: String) extends RedditClientException(s"Need text to post to: /$path")
+class DeletedLinkException(val path: String) extends RedditClientException(s"The following link has been deleted: /$path")
+class RedditClientException(message: String) extends RuntimeException(message)

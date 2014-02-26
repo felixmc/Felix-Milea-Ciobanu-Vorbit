@@ -1,5 +1,5 @@
 package com.felixmilea.vorbit.reddit.connectivity
 
-class RedditUser(val credential: Credential, var session: Session = null) {
+case class RedditUser(val credential: Credential, var session: Session = null, val id: Int = -1) {
   def hasValidSession(): Boolean = session != null && session.isValid
 }
