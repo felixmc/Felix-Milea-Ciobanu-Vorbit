@@ -20,7 +20,7 @@ class CommentComposer(private[this] val ngrams: NgramManager) extends Loggable {
 
     for (i <- 0 until units.length) {
       sb ++= units(i).replace("NL", "  ")
-      if (i + 1 < units.length && !noSpaceChars.contains(units(i + 1).head)) {
+      if (i + 1 < units.length && !noSpaceChars.contains(units(i + 1).head) && units(i) != "^") {
         sb += ' '
       }
     }

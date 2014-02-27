@@ -24,7 +24,7 @@ class PostingCoordinator(config: JSON, task: JSON) extends ManagedActor {
     case l: PostListingResult => {
       val criteria = task.targets(l.tag.toInt).constraints.map(ps => new ValidationCriteria(minKarma = ps.minKarma, maxAge = ps.maxAge))
       val postType = PostType.withName(task.postType)
-      validator ! ValidateListingPosts(l, PostValidator(postType, criteria), this.selfSelection)
+      validator ! ValidateListingPosts(l, PostValidator(postType, criteria, true), this.selfSelection)
     }
     case ValidationResult(post, source, tag) => {
       recorder ! CheckTarget(PostingTarget(post, dataset, subset, edition), this.selfSelection)

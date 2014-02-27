@@ -17,9 +17,12 @@ class RedditPostValidator extends ManagedActor {
   def doReceive = {
     case ValidateListingPosts(listing, validator, receiver) => {
       for (postJson <- listing.json.filterNot(p => p.data.stickied)) {
-        val post = ModelParser.parsePost(postJson.data)
-        val isValid = isValidPost(post, validator)
-        if (isValid) receiver ! ValidationResult(post, "listing", listing.tag)
+        val ignore = validator.ignoreSerious && postJson.data.link_flair_text.toString.toLowerCase.contains("serious")
+        if (!ignore) {
+          val post = ModelParser.parsePost(postJson.data)
+          val isValid = isValidPost(post, validator)
+          if (isValid) receiver ! ValidationResult(post, "listing", listing.tag)
+        }
       }
     }
     case ValidateCommentListing(listing, validator, receiver) => {
@@ -93,6 +96,6 @@ object RedditPostValidator {
   case class ValidationResult(post: RedditPost, source: String, tag: String = "")
 
   case class ValidationCriteria(minKarma: Int = 0, maxKarma: Int = 0, minAge: Int = 0, maxAge: Int = 0, minGild: Int = 0)
-  case class PostValidator(postType: PostType.PostType, criteria: Seq[ValidationCriteria])
+  case class PostValidator(postType: PostType.PostType, criteria: Seq[ValidationCriteria], ignoreSerious: Boolean = false)
   case class CommentValidator(criteria: Seq[ValidationCriteria])
 }

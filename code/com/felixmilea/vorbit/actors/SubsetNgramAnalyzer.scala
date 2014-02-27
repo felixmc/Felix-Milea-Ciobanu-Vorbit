@@ -61,14 +61,16 @@ class SubsetNgramAnalyzer extends ManagedActor {
         })
       })
 
+      Debug("done analyzing comment")
+
       // for n > 1
-      for (n <- minLevel to maxLevel) {
-        seqIterator(n, parent._2)(pGram => {
-          seqIterator(n, child._2)(cGram => {
-            record(dataset, edition, n, parent._1, child._1, getId(pGram), getId(cGram))
-          })
-        })
-      }
+      //      for (n <- minLevel to maxLevel) {
+      //        seqIterator(n, parent._2)(pGram => {
+      //          seqIterator(n, child._2)(cGram => {
+      //            record(dataset, edition, n, parent._1, child._1, getId(pGram), getId(cGram))
+      //          })
+      //        })
+      //      }
     }
   }
 
@@ -84,7 +86,7 @@ class SubsetNgramAnalyzer extends ManagedActor {
 
 object SubsetNgramAnalyzer {
   val minLevel = 2
-  val maxLevel = 4
+  val maxLevel = 2
 
   case class ParentChild(dataset: Int, edition: Int, parent: (Int, Seq[Int]), child: (Int, Seq[Int]))
 

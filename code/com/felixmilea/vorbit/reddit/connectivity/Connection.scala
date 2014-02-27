@@ -17,7 +17,7 @@ class Connection(val uri: String, params: ConnectionParameters = new ConnectionP
   private val data = params.toString
   private val query = if (!isPost && !data.isEmpty) if (uri.contains('?')) s"&$data" else s"?$data" else ""
 
-  private val useProxy = true
+  private val useProxy = false
 
   private val conn: HttpURLConnection = {
     if (useProxy) {

@@ -10,12 +10,13 @@ import com.felixmilea.vorbit.actors.ActorManager.PingChildren
 class SubsetMiner(dataset: Int, subsets: Tuple2[Int, Int], edition: Int) extends Thread with Loggable {
   val manager = AppUtils.actorSystem.actorOf(Props(new SubsetAnalysisManager(dataset, subsets, edition)), "SubsetMiner")
 
-  private[this] val downloader = AppUtils.actor(manager.path.child(SubsetAnalysisManager.ActorNames.downloader))
-  private[this] val coordinator = AppUtils.actor(manager.path.child(SubsetAnalysisManager.ActorNames.coordinator))
+  private[this] val downloader = AppUtils.actor(manager.path.parent.child(SubsetAnalysisManager.ActorNames.downloader))
+  private[this] val coordinator = AppUtils.actor(manager.path.parent.child(SubsetAnalysisManager.ActorNames.coordinator))
 
   def ping() = manager ! PingChildren()
 
   override def run() {
+    Thread.sleep(1000)
     Info(s"Started subset comparison analysis on subsets $subsets of dataset $dataset")
     downloader ! Request(Posts(dataset, subsets._1), coordinator)
   }
