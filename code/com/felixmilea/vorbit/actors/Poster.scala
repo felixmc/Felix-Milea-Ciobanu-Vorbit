@@ -24,7 +24,7 @@ class Poster(getter: Function0[RedditUser]) extends ManagedActor {
     do {
       try {
         val user = getter.apply()
-        //        Warning("grabbed user: " + user.credential.username)
+        Warning("grabbed user: " + user.credential.username + " with session " + user.session.cookie)
         cl = new Client(user)
 
       } catch {
@@ -50,7 +50,7 @@ class Poster(getter: Function0[RedditUser]) extends ManagedActor {
         comment(node, text, request)()
       }
       case GeneratedReply(target, text) => {
-        comment(target.post.thingId, text, request)(result => {
+        comment(target.post.thingId, text, request, true)(result => {
           val json = JSON(result).json.data.things(0).data
           recorder ! RecordComment(target, json.id, text, user.id)
           Debug("comment to '" + target.post.thingId + "' by " + user.credential.username)
@@ -60,15 +60,16 @@ class Poster(getter: Function0[RedditUser]) extends ManagedActor {
     }
   }
 
-  private[this] def comment(node: String, text: String, request: Any)(callback: Function[String, Unit] = (s) => {}) {
+  private[this] def comment(node: String, text: String, request: Any, proxy: Boolean = false)(callback: Function[String, Unit] = (s) => {}) {
     try {
-      val result = client.comment(node, text)
+      val result = client.comment(node, text, proxy)
       callback.apply(result)
     } catch {
       case rte: RateLimitException => {
-        Warning(rte.username + " has been rate limited and is going to sleep for " + rte.time + " seconds. Comment request requeued to posting pool.")
+        Warning(rte.username + " has been rate limited for " + rte.time + " seconds. Comment request requeued to posting pool.")
+        Thread.sleep(5000)
         this.selfPool ! request
-        Thread.sleep((rte.time * 1000).toLong)
+        //        Thread.sleep((rte.time * 1000).toLong)
       }
       case toe: TooOldException => {
         Warning("'" + toe.path + "' seems to be too old to be commented on. Comment request ignored.")
@@ -86,7 +87,7 @@ class Poster(getter: Function0[RedditUser]) extends ManagedActor {
       }
       case ioe: IOException => {
         Error("An unexpected connection error was encountered. Comment request requeued to posting pool: " + ioe.getMessage())
-        Warning("node: " + node + "\ttext: " + text)
+        //        Warning("node: " + node + "\ttext: " + text)
         this.selfPool ! request
         Thread.sleep(2000)
       }

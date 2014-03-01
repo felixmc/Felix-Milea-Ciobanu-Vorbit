@@ -2,6 +2,7 @@ package com.felixmilea.vorbit.actors
 
 import com.felixmilea.vorbit.data.DBConnection
 import scala.collection.mutable.HashMap
+import com.felixmilea.vorbit.utils.Loggable
 
 class SubsetNgramAnalyzer extends ManagedActor {
   import SubsetNgramAnalyzer._
@@ -61,7 +62,7 @@ class SubsetNgramAnalyzer extends ManagedActor {
         })
       })
 
-      Debug("done analyzing comment")
+      done()
 
       // for n > 1
       //      for (n <- minLevel to maxLevel) {
@@ -84,10 +85,17 @@ class SubsetNgramAnalyzer extends ManagedActor {
 
 }
 
-object SubsetNgramAnalyzer {
+object SubsetNgramAnalyzer extends Loggable {
   val minLevel = 2
   val maxLevel = 2
 
   case class ParentChild(dataset: Int, edition: Int, parent: (Int, Seq[Int]), child: (Int, Seq[Int]))
+
+  var i = 0;
+
+  def done() = this.synchronized {
+    i = i + 1
+    Debug("done analyzing comment " + i)
+  }
 
 }

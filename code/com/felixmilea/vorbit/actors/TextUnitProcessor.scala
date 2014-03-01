@@ -29,7 +29,9 @@ class TextUnitProcessor extends ManagedActor {
       ifSome(getNgrams(text, dataset, subset, true)) { processor ! NgramProcessor.TextUnits(_) }
     }
     case RetrieveText(text, dataset, subset, id, receiver) => {
-      ifSome(getNgrams(text, dataset, subset, false)) { receiver ! GramSet(dataset, editionId, subset, id, _) }
+      ifSome(getNgrams(text, dataset, subset, false))(grams => {
+        receiver ! GramSet(dataset, editionId, subset, id, grams.drop(1).dropRight(1))
+      })
     }
   }
 

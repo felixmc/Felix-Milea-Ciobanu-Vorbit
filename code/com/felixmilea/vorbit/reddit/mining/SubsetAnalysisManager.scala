@@ -16,12 +16,12 @@ class SubsetAnalysisManager(dataset: Int, subsets: Tuple2[Int, Int], edition: In
   protected[this] val name: String = "SubsetAnalysisManager"
 
   override protected[this] lazy val actors = Map(
-    (ActorNames.downloader -> Props(new RedditCorpusRetriever(subsets)).withRouter(SmallestMailboxRouter(10))),
+    (ActorNames.downloader -> Props(new RedditCorpusRetriever(subsets)).withRouter(SmallestMailboxRouter(5))),
     (ActorNames.coordinator -> Props[SubsetMiningCoordinator].withRouter(SmallestMailboxRouter(20))),
-    (ActorNames.textProcessor -> Props[TextUnitProcessor].withRouter(SmallestMailboxRouter(15))),
+    (ActorNames.textProcessor -> Props[TextUnitProcessor].withRouter(SmallestMailboxRouter(10))),
     (ActorNames.parentCache -> Props[PostGramCache]),
     (ActorNames.joiner -> Props[SubsetNgramJoiner].withRouter(SmallestMailboxRouter(30))),
-    (ActorNames.analyzer -> Props[SubsetNgramAnalyzer].withRouter(SmallestMailboxRouter(20))) // last
+    (ActorNames.analyzer -> Props[SubsetNgramAnalyzer].withRouter(SmallestMailboxRouter(40))) // last
     )
 
 }

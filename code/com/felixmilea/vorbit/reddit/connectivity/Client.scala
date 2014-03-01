@@ -61,7 +61,7 @@ class Client(private[this] var user: RedditUser = null) extends Loggable {
 
   def getJSON(path: String): JSON = JSON(get(path))
 
-  def comment(thingId: String, text: String): String = {
+  def comment(thingId: String, text: String, useProxy: Boolean = false): String = {
     tryLogin()
 
     val params = new ConnectionParameters()
@@ -70,7 +70,7 @@ class Client(private[this] var user: RedditUser = null) extends Loggable {
     params += ("thing_id" -> thingId)
 
     val headers = getAuthHeaders()
-    val conn = new Connection(s"api/comment", params, true, headers)
+    val conn = new Connection(s"api/comment", params, true, headers, useProxy)
     val response = checkErrors(conn)
 
     return response

@@ -10,19 +10,16 @@ import java.net.Proxy
 import java.net.InetSocketAddress
 import com.felixmilea.vorbit.utils.Loggable
 
-class Connection(val uri: String, params: ConnectionParameters = new ConnectionParameters(), isPost: Boolean = false, headers: Map[String, String] = Map())
+class Connection(val uri: String, params: ConnectionParameters = new ConnectionParameters(), isPost: Boolean = false, headers: Map[String, String] = Map(), useProxy: Boolean = false)
   extends Loggable {
   import ConnectionUtils._
 
   private val data = params.toString
   private val query = if (!isPost && !data.isEmpty) if (uri.contains('?')) s"&$data" else s"?$data" else ""
 
-  private val useProxy = false
-
   private val conn: HttpURLConnection = {
     if (useProxy) {
-      val proxy = new Proxy(Proxy.Type.SOCKS, new InetSocketAddress("localhost", 9050))
-      URL(uri + query).openConnection(proxy).asInstanceOf[HttpURLConnection]
+      URL(uri + query).openConnection(ProxyManager.grabNext()).asInstanceOf[HttpURLConnection]
     } else URL(uri + query).openConnection().asInstanceOf[HttpURLConnection]
   }
 
