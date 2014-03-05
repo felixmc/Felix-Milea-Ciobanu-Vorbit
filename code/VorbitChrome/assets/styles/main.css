@@ -1,0 +1,206 @@
+@font-face {
+  font-family: 'vorbit';
+  src: url('../fonts/vorbit.svg?60488270#vorbit') format('svg');
+  font-weight: normal;
+  font-style: normal;
+}
+ 
+ [class^="icon-"]:before, [class*=" icon-"]:before {
+  font-family: "vorbit";
+  font-style: normal;
+  font-weight: normal;
+  speak: none;
+  display: inline-block;
+  text-decoration: inherit;
+  text-align: center;
+ 
+  /* For safety - reset parent styles, that can break glyph codes*/
+  font-variant: normal;
+  text-transform: none;
+}
+ 
+.icon-dashboard:before { content: '\e801'; } /* '' */
+.icon-data:before { content: '\e800'; } /* '' */
+.icon-mining:before { content: '\e804'; } /* '' */
+.icon-posting:before { content: '\e803'; } /* '' */
+.icon-exit:before { content: '\e802'; } /* '' */
+.icon-start:before { content: '\e80a'; } /* '' */
+.icon-stop:before { content: '\e808'; } /* '' */
+.icon-pause:before { content: '\e809'; } /* '' */
+.icon-eye:before { content: '\e805'; } /* '' */
+.icon-options:before { content: '\e806'; } /* '' */
+.icon-graph:before { content: '\e807'; } /* '' */
+
+html {
+	padding-bottom: 1px;
+	height: 100%;
+	margin: 0;
+	padding: 0;
+}
+
+body {
+	box-shadow: inset 0 0 0 1px rgba(0,0,0,0.8), inset 0 0 0 2px rgba(255,255,255,0.2);
+	margin: 0;
+	padding: 35px 3px 3px;
+	height: -webkit-calc(100% - 38px);
+	background: #0162ab;
+}
+
+#titleBar {
+	height: 35px;
+	width: 100%;
+	position: fixed;
+	top: 1px;
+	left: 1px;
+	-webkit-app-region: drag;
+	text-align: center;
+	line-height: 2.25em;
+	font-weight: bold;
+	font-size: 1.2em;
+	color: #fff;
+	background: linear-gradient(to top,rgba(255,255,255,.0), rgba(255,255,255,.3));
+}
+
+.logo {
+	background: url("../images/logo.png") no-repeat center center;
+	background-size: 60%;
+}
+
+#main-nav {
+	width: 100px;
+	height: -webkit-calc(100% - 5px);
+	background: #454545;
+	border: 1px solid #222;
+	margin-left: 2px;
+	float: left;
+}
+
+#main-nav ul {
+	margin: 0;
+	padding: 0;
+}
+
+#main-nav li {
+	list-style-type: none;
+	border-bottom: 1px solid #000;
+	width: 100%;
+	height: 5em;
+	padding: .8em 0 .5em;
+	box-shadow: 0 1px 0 0 rgba(255,255,255,.1);
+}
+
+#main-nav li.selected {
+	background: #323232;
+}
+
+#main-nav li a {
+	display: block;
+	text-align: center;
+}
+
+#main-nav li a:link, #main-nav li a:visited, #main-nav li a:active {
+	text-decoration: none;
+	color: #bababa;
+	font-size: 2em;
+	/*text-shadow: -1px -1px 1px rgba(0,0,0,.8), 0px 0px 45px rgba(255,255,255,.4); */
+}
+
+#main-nav li.selected a:link {
+	color: #fff;
+}
+
+#main-nav li a:before {
+	text-shadow: 0 1px 2px rgba(0,0,0,.6);
+}
+
+#main-nav li a:after {
+	content: attr(title);
+	font-size: .5em;
+	position: relative;
+	top: 0.3em;
+	display: block;
+	text-transform: capitalize;
+}
+
+#content {
+	height: -webkit-calc(100% - 5px);
+	margin-left: 104px;
+	padding: 0;
+	background: #ddd;
+	width: -webkit-calc(100% - 107px);
+	border: 1px solid #222;
+	border-left: none;
+	position: relative;
+}
+
+.page {
+	display: none;
+}
+
+.page.selected {
+	display: block;
+}
+
+.header {
+	height: 100px;
+	background: red;
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+}
+
+.header p {
+	font-size: 3em;
+	text-align: center;
+	margin-top: .75em;
+	color: #fff;
+	font-weight: bold;
+	text-shadow: 0 2px 5px rgba(0,0,0,.7);
+	-webkit-font-smoothing: antialiased;
+	-webkit-text-stroke: 1px #fff;
+}
+
+#page-mining .header {
+	background: url("../images/binary.jpg") no-repeat;
+	border-bottom: 1px solid #555;
+	box-shadow: inset 0 -1px 0 0 rgba(255,2555,255,.4);
+}
+
+.page .header + * {
+	margin-top: 100px;
+}
+
+.miner {
+	font-size: 1.5em;
+	padding: .25em .2em;
+	border-bottom: 1px solid #aaa;
+	background: #fff;
+	box-shadow: 0 1px 1px 0 rgba(0,0,0,.1),inset 0 -1px 0 0 #fff;
+}
+
+.miner-status {
+	border: none;
+	outline: none;
+	background: none;
+	cursor: pointer;
+	font-size: 1em;
+}
+
+.miner-status.icon-start {
+	color: #ff5700;
+}
+
+.miner-options {
+	display: inline-block;
+	margin: 0;
+	padding: 0;
+	float: right;
+	margin-right: 20px;
+}
+
+.miner-options > li {
+	list-style-type: none;
+	float: left;
+	margin-left: 10px;
+}

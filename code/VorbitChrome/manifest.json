@@ -7,5 +7,9 @@
       "scripts": ["main.js"]
     }
   },
+  "permissions": [
+  	"http://localhost:3000/*",
+  	"identity"
+  ],
   "icons": { "16": "icon-16.png", "128": "icon-128.png" }
 }
