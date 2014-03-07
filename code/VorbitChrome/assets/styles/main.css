@@ -30,6 +30,7 @@
 .icon-eye:before { content: '\e805'; } /* '' */
 .icon-options:before { content: '\e806'; } /* '' */
 .icon-graph:before { content: '\e807'; } /* '' */
+.icon-compose:before { content: '\e80b'; } /* '' */
 
 html {
 	padding-bottom: 1px;
@@ -131,6 +132,8 @@ body {
 	border: 1px solid #222;
 	border-left: none;
 	position: relative;
+	overflow-x: hidden;
+	overflow-y: auto;
 }
 
 .page {
@@ -148,6 +151,8 @@ body {
 	top: 0;
 	left: 0;
 	width: 100%;
+	border-bottom: 1px solid #555;
+	box-shadow: inset 0 -1px 10px 0 rgba(0,0,0,.5);
 }
 
 .header p {
@@ -161,10 +166,16 @@ body {
 	-webkit-text-stroke: 1px #fff;
 }
 
+#page-dashboard .header {
+	background: url("../images/datanodes.png") no-repeat;
+}
+
 #page-mining .header {
+	background: url("../images/home.png") no-repeat;
+}
+
+#page-data .header {
 	background: url("../images/binary.jpg") no-repeat;
-	border-bottom: 1px solid #555;
-	box-shadow: inset 0 -1px 0 0 rgba(255,2555,255,.4);
 }
 
 .page .header + * {
@@ -175,7 +186,7 @@ body {
 	font-size: 1.5em;
 	padding: .25em .2em;
 	border-bottom: 1px solid #aaa;
-	background: #fff;
+	background: linear-gradient(#fff, #eee);
 	box-shadow: 0 1px 1px 0 rgba(0,0,0,.1),inset 0 -1px 0 0 #fff;
 }
 
@@ -188,7 +199,7 @@ body {
 }
 
 .miner-status.icon-start {
-	color: #ff5700;
+	color: #2DE300;
 }
 
 .miner-options {
@@ -203,4 +214,40 @@ body {
 	list-style-type: none;
 	float: left;
 	margin-left: 10px;
+}
+
+.widget {
+	padding: 1.5em;
+}
+
+#table-wrap {
+	padding: 0 1.5em;
+}
+
+table {
+	text-align: left;
+	font-size: 1.3em;
+	margin: 1em auto;
+	border-collapse: collapse;
+	border-left: 1px solid #aaa;
+	border-right: 1px solid #aaa;
+}
+
+thead tr {
+	background: linear-gradient(#333, #222);
+	color: #fff;
+}
+
+tbody tr {
+	border-bottom: 1px solid #aaa;
+	background: linear-gradient(#fff, #eee);
+	box-shadow: 0 1px 1px 0 rgba(0,0,0,.1),inset 0 -1px 0 0 #fff;	
+}
+
+th {
+	text-transform: capitalize;
+}
+
+th, td {
+	padding: 3px 10px;
 }

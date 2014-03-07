@@ -1,8 +1,8 @@
 package com.felixmilea.vorbit.utils
 
-import scala.collection.mutable.HashMap
 import java.io.File
 import java.io.FilenameFilter
+import scala.collection.mutable.HashMap
 import scala.io.Source
 import com.felixmilea.vorbit.data.DBConfig
 import com.felixmilea.vorbit.reddit.mining.MinerConfigParser
