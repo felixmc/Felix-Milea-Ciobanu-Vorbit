@@ -25,20 +25,34 @@ abstract class ActorManager extends Actor with Loggable {
     children
   }
 
+  private[this] var lastPong: Pong = null
   private[this] var pongs = -1
 
   def receive = {
-    case GetChildren() => sender ! children
-    case PingChildren() =>
+    case PingChildren => {
+      Info("got ping children")
       if (pongs == -1) {
         children.foreach(_._2 ! Ping())
         pongs = 0
       }
+    }
+
+    case PingStatus => {
+      // awaiting ping
+      if (pongs != -1) {
+        sender ! NotDone
+      } // if not awaiting ping, but have in the past
+      else if (lastPong != null) {
+        sender ! Done(lastPong.received, lastPong.elapsed)
+      }
+    }
+
     case p: Pong =>
       if (pongs != -1) {
         pongs = 1 + pongs
         if (pongs == children.size) {
           Info(s"${self.path}: children took ${p.elapsed}ms to respond.")
+          lastPong = p
           pongs = -1
         }
       }
@@ -51,6 +65,12 @@ object ActorManager {
     val elapsed = received.getTime - ping.sent.getTime
   }
 
-  case class PingChildren()
-  case class GetChildren()
+  trait DoneStatus
+  trait ManagerCommand
+
+  case class Done(finished: Date, duration: Long) extends DoneStatus
+  case class NotDone extends DoneStatus
+
+  case class PingChildren extends ManagerCommand
+  case class PingStatus extends ManagerCommand
 }

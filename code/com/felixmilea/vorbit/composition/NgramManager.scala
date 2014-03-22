@@ -6,8 +6,9 @@ import com.felixmilea.vorbit.data.DBConnection
 import com.felixmilea.vorbit.data.ResultSetIterator
 import com.felixmilea.vorbit.utils.Loggable
 import com.felixmilea.vorbit.utils.AppUtils
+import scala.collection.mutable.HashMap
 
-class NgramManager(val n: Int, dataset: Int, subset: Int, edition: Int) extends Loggable {
+class NgramManager private (val n: Int, dataset: Int, subset: Int, edition: Int) extends Loggable {
 
   if (n < 1)
     throw new IllegalArgumentException(s"Value '$n' for parameter n does not satisfy n > 0")
@@ -79,4 +80,20 @@ class NgramManager(val n: Int, dataset: Int, subset: Int, edition: Int) extends 
     }).toMap
 
   db.conn.close()
+}
+
+object NgramManager {
+  private val managers = new HashMap[(Int, Int, Int, Int), NgramManager]
+
+  def apply(n: Int, dataset: Int, subset: Int, edition: Int): NgramManager = {
+
+    managers.get((n, dataset, subset, edition)) match {
+      case Some(man) => return man
+      case None => {
+        val man = new NgramManager(n, dataset, subset, edition)
+        managers += (n, dataset, subset, edition) -> man
+        return man
+      }
+    }
+  }
 }

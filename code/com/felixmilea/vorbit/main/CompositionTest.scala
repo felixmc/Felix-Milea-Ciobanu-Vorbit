@@ -11,7 +11,7 @@ object CompositionTest extends App with Loggable {
   val n = 4
   val count = 10
 
-  val (datasetId, subsetId, editionId) = (AppUtils.config.persistence.data.datasets("unidanBot"),
+  val (datasetId, subsetId, editionId) = (AppUtils.config.persistence.data.datasets("maybeHumanBot"),
     AppUtils.config.persistence.data.subsets("children"), AppUtils.config.persistence.data.editions("symbolWords"))
 
   val composer = new CommentComposer(n, datasetId, subsetId, editionId)

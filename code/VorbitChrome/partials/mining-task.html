@@ -1,0 +1,38 @@
+	<fieldset class="task">
+		<legend>Task</legend>
+		<button class="remove">Remove</button>
+		<p data-label="Name"><input name="name" type="text" /></p>
+		<p data-label="Recurrence"><input name="recurrence" type="number" value="0" /></p>
+		<p data-label="Target Type"><select name="targetType"></p>
+			<option value="subreddit">subreddit</option>
+			<option value="user">user</option>
+		</select></p>
+		<p data-label="Post Type"><select name="postType">
+			<option value="self">self</option>
+			<option value="link">link</option>
+			<option value="both">both</option>
+		</select></p>
+		<p data-label="Parse Post Content"><input name="parsePostContent" type="checkbox" checked /></p>
+		<p data-label="Post Sort"><select name="postSort">
+			<option value="hot">hot</option>
+			<option value="new">new</option>
+			<option value="rising">rising</option>
+			<option value="controversial">controversial</option>
+			<option value="top">top</option>
+		</select></p>
+		<p data-label="Time"><input name="time" value="all" type="text" /></p>
+		<p data-label="Post Listings"><input name="postListings" type="number" value="5" /></p>
+		<p data-label="Listing Limit"><input name="postLimit" type="number" value="25" /></p>
+		<p data-label="Comment Sort"><select name="commentSort">
+			<option value="best">best</option>
+			<option value="top">top</option>
+			<option value="hot">hot</option>
+			<option value="new">new</option>
+			<option value="controversial">controversial</option>
+			<option value="old">old</option>
+		</select></p>
+		<p data-label="Comment Nesting"><input name="commentNesting" type="number" value="0" /></p>
+		<section class="targets">
+			<button id="add-target">Add Target</button>
+			</section>
+	</fieldset>

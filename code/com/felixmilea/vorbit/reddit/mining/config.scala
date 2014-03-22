@@ -2,8 +2,8 @@ package com.felixmilea.vorbit.reddit.mining
 
 package config {
 
-  class MinerConfigParsingException(miner: String, nse: NoSuchElementException)
-    extends RuntimeException(s"MinerConfigParsing encountered a parsing error while parsing miner '$miner'.")
+  class MinerConfigParsingException(miner: String, e: Exception)
+    extends RuntimeException(s"MinerConfigParsing encountered a parsing error while parsing miner '$miner': " + e)
 
   case class MinerConfig(
     dataset: String,

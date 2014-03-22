@@ -6,7 +6,7 @@ import akka.actor.ActorRef
 import akka.actor.ActorPath
 
 object AppUtils {
-  lazy val actorSystem: ActorSystem = ActorSystem("Application")
+  lazy val actorSystem: ActorSystem = ActorSystem("Workers")
   lazy val log: ActorRef = actorSystem.actorOf(Props[Log], "Log")
   lazy val config: ConfigManager = new ConfigManager("config/")
   val baseActorPath: String = "akka://Application/user/"

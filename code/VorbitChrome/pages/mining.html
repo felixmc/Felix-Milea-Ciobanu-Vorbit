@@ -1,30 +1,29 @@
 <div class="header">
-	<p><span class="count">14,521</span> posts mined</p>
+	<p><span id="mine-count"></span> posts mined</p>
 </div>
-<div class="miner" data-miner-id="4">
-	<button class="miner-status icon-start" />
-	<span class="name">Smart Bot</span>
-	<ul class="miner-options">
-		<li class="icon-eye"></li>
-		<li class="icon-options"></li>
-		<li class="icon-graph"></li>			
-	</ul>
+
+<div class="miner-list item-list">
+	<div class="miner item new selected">
+		<span class="name">Create New Miner</span>
+	</div>
 </div>
-<div class="miner" data-miner-id="3">
-	<button class="miner-status icon-start" />
-	<span class="name">Answer Bot</span>
-	<ul class="miner-options">
-		<li class="icon-eye"></li>
-		<li class="icon-options"></li>
-		<li class="icon-graph"></li>			
+
+<div class="miner-details item-details new">
+	<ul class="toolbar icon-nav">
+		<li class="running-inactive"><a href="#save" title="save" class="icon-save"></a></li>
+		<li class="sep new-inactive running-inactive"><a href="#delete" title="delete" class="icon-delete"></a></li>
+
+		<li class="new-inactive running-inactive"><a href="#start" title="start" class="icon-start"></a></li>
+		<li class="inactive running-active"><a href="#stop" title="stop" class="icon-stop"></a></li>
+		<!-- <li class="inactive"><a href="#track" title="track" class="icon-eye"></a></li> -->
+		<!-- <li><a href="#options" title="options" class="icon-options"></a></li> -->
+		<!-- <li><a href="#data" title="data" class="icon-graph"></a></li> -->
 	</ul>
-</div>
-<div class="miner" data-miner-id="5">
-	<button class="miner-status icon-start" />
-	<span class="name">Unidan Bot</span>
-	<ul class="miner-options">
-		<li class="icon-eye"></li>
-		<li class="icon-options"></li>
-		<li class="icon-graph"></li>			
-	</ul>
+	<form id="config-form">
+		<p data-label="Dataset"><input name="dataset" type="text" /></p>
+		<input name="active" type="hidden" val="true" />
+		<section class="tasks">
+			<button id="add-task">Add Task</button>
+		</section>
+	</form>
 </div>

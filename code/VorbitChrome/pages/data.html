@@ -1,16 +1,49 @@
 <div class="header">
 	<p><span class="count">1.1 GB</span> data collected</p>
-<form class="widget">
-	<label for="tables">table</label>
-	<select id="tables">
+</div>
+<div class="toolbar">
+	<select name="table">
 		<option value="" disabled selected>select table</option>
-		<option value="reddit_corpus">mined posts</option>
-		<option value="1grams">1 grams</option>
+		<option value="reddit_corpus" data-params="dataset,subset">mined posts</option>
+		<option value="1grams" data-params="dataset,subset,edition">1 grams</option>
 		<option value="2grams">2 grams</option>
 		<option value="3grams">3 grams</option>
 		<option value="4grams">4 grams</option>
-		<option value="posted_content">posted content</option>
-		<option value="subset_ngram_comparisons">subset comparisons</option>
+		<option value="posted_content" data-params="dataset,subset,edition">posted content</option>
+		<option value="subset_ngram_comparisons" data-params="dataset,edition">subset comparisons</option>
 	</select>
-</form>
+
+	<select name="dataset" class="miners-list" disabled>
+		<option value="" disabled selected>dataset</option>
+	</select>
+
+	<select name="subset" class="subsets-list" disabled>
+		<option value="" disabled selected>subset</option>
+	</select>
+
+	<select name="edition" class="editions-list" disabled>
+		<option value="" disabled selected>edition</option>
+	</select>
+
+	<select name="sort">
+		<option value="" disabled selected>sort</option>
+	</select>
+
+	<select name="sortDir">
+		<option value="" disabled>sort dir</option>
+		<option value="ASC">ASC</option>
+		<option value="DESC" selected>DESC</option>
+	</select>
+
+	<select name="limit">
+		<option value="" disabled>limit</option>
+		<option value="30" selected>30</option>
+		<option value="50">50</option>
+		<option value="100">100</option>
+	</select>
+
+	<input name="page" value="1" type="number" />
+
+	<button id="update" class="button">update</button>
+</div>
 <div id="table-wrap"></div>

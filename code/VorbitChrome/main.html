@@ -6,12 +6,16 @@
     <link href="assets/styles/main.css" rel="stylesheet">
 </head>
 <body>
-	<div id="titleBar">Vorbit</div>
-	<nav id="main-nav">
+	<div id="titleBar">
+		<span>Vorbit</span>
+		<div class="drag"></div>
+		<div class="close"><span>&times;</span></div>
+	</div>
+	<nav id="main-nav" class="icon-nav">
 		<ul>
 			<!-- <li class="logo"></li> -->
-			<li class="selected"><a href="#dashboard" title="dashboard" class="icon-dashboard"></a></li>
-			<li><a href="#mining" title="mine" class="icon-mining"></a></li>
+			<!-- <li><a href="#dashboard" title="dashboard" class="icon-dashboard"></a></li> -->
+			<li class="selected"><a href="#mining" title="mine" class="icon-mining"></a></li>
 			<li><a href="#compose" title="compose" class="icon-compose"></a></li>
 			<li><a href="#posting" title="post" class="icon-posting"></a></li>
 			<li><a href="#data" title="data" class="icon-data"></a></li>

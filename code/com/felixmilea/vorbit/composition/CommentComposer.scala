@@ -5,7 +5,7 @@ import com.felixmilea.vorbit.utils.Loggable
 class CommentComposer(private[this] val ngrams: NgramManager) extends Loggable {
 
   def this(n: Int, dataset: Int, subset: Int, edition: Int) = {
-    this(new NgramManager(n, dataset, subset, edition))
+    this(NgramManager(n, dataset, subset, edition))
   }
 
   val n = ngrams.n

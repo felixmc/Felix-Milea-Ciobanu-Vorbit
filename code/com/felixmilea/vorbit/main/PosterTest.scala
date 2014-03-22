@@ -13,7 +13,7 @@ object PosterTest extends App with Loggable {
   //  start posters based on config
   for (config <- AppUtils.config("posters")) {
     try {
-      val poster = new RedditPoster(config)
+      val poster = new RedditPoster(config, manager)
       poster.start()
     } catch {
       case t: Throwable => {

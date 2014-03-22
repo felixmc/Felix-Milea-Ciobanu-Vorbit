@@ -6,10 +6,26 @@ import scala.util.parsing.json.JSONArray
 
 object JSON {
   def apply(s: String) = new JSON(scala.util.parsing.json.JSON.parseRaw(s))
+  def apply(l: List[Any]) = new JSON(new JSONArray(l))
+
   implicit def ScalaJSONToString(s: JSON) = s.toString
   implicit def ScalaJSONToInt(s: JSON) = s.toInt
   implicit def ScalaJSONToDouble(s: JSON) = s.toDouble
   implicit def ScalaJSONToBool(s: JSON) = s.toBool
+
+  def makeJSON(a: Any): String = a match {
+    case m: Map[String, Any] => m.map {
+      case (name, content) => makeJSON(name.toString) + ":" + makeJSON(content)
+    }.mkString("{", ",", "}")
+    case l: List[Any] => l.map(makeJSON).mkString("[", ",", "]")
+    case s: String => "\"" + s + "\""
+    case i: Int => i.toString
+    case d: Double => d.toString
+    case b: Boolean => b.toString
+    case a: JSONArray => makeJSON(a.list)
+    case m: JSONObject => makeJSON(m.obj)
+    case j: JSON => makeJSON(j.o)
+  }
 }
 
 case class JSONException extends Exception
@@ -45,7 +61,9 @@ class JSON(a: Any) extends Seq[JSON] with Dynamic {
   }
 
   def toBool: Boolean = o match {
-    case b: java.lang.Boolean => b
+    case b: Boolean => b
+    case "true" => true
+    case "false" => false
     case _ => throw new JSONException
   }
 

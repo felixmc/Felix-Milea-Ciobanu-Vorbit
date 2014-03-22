@@ -11,6 +11,8 @@ import com.felixmilea.vorbit.actors.PostRecorder
 class PostingManager(posters: Int) extends ActorManager {
   import PostingManager._
 
+  def this() = this(1)
+
   protected[this] val name: String = "PostingManager"
 
   override protected[this] lazy val actors = {
@@ -24,8 +26,8 @@ class PostingManager(posters: Int) extends ActorManager {
 
 object PostingManager {
   object Names {
-    val download = "Downloader"
-    val validator = "Validator"
+    val download = "PDownloader"
+    val validator = "PValidator"
     val recorder = "PostRecorder"
     val composer = "Composer"
     val poster = "Poster"

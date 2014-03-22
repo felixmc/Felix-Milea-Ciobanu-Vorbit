@@ -36,13 +36,19 @@ class ConfigPersistence(config: ConfigManager) {
       name -> createEdition.getInt(2)
     }).toMap
 
-    val datasets = {
+    val curDatasets = {
       ResultSetIterator(getDatasets.executeQuery()).map(r => {
         r.getString("name") -> r.getInt("id")
       }).toMap
     }
 
-    config.miners.filterNot(mc => datasets.contains(mc.dataset)).foreach(mc => (mc.dataset, registerMiner(mc)))
+    config.miners.filterNot(mc => curDatasets.contains(mc.dataset)).foreach(mc => (mc.dataset, registerMiner(mc)))
+
+    val datasets = {
+      ResultSetIterator(getDatasets.executeQuery()).map(r => {
+        r.getString("name") -> r.getInt("id")
+      }).toMap
+    }
 
     db.conn.close()
 

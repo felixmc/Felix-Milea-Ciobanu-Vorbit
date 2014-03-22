@@ -3,16 +3,18 @@ package com.felixmilea.vorbit.reddit.mining
 import com.felixmilea.vorbit.utils.JSON
 import scala.collection.immutable.VectorBuilder
 import com.felixmilea.vorbit.utils.Loggable
+import com.felixmilea.vorbit.utils.JSONException
 
 object MinerConfigParser {
   import com.felixmilea.vorbit.reddit.mining.config._
 
   def parse(json: JSON): MinerConfig = {
-    try {
-      new MinerConfig(json("dataset"), json("active"), parseTasks(json("tasks")))
-    } catch {
-      case nse: NoSuchElementException => throw new MinerConfigParsingException(json("dataset"), nse)
-    }
+    //    try {
+    new MinerConfig(json("dataset"), json("active"), parseTasks(json("tasks")))
+    //    } catch {
+    //      case je: JSONException => throw new MinerConfigParsingException(null, je)
+    //      case nse: NoSuchElementException => throw new MinerConfigParsingException(json("dataset"), nse)
+    //    }
   }
 
   def parseTasks(json: JSON): Seq[Task] = {

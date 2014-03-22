@@ -36,11 +36,13 @@ case class Response(status: Status, body: ByteString, headers: Seq[Header] = Res
 
 object Response {
   val httpver = ByteString("HTTP/1.1")
-  val defaultHeaders = Seq(Header("Content-Type", "text/plain"))
+  val defaultHeaders = Seq(Header.Content.plain)
   val lengthHeader = "content-length"
 
   def apply(status: Status, sbody: String, headers: Seq[Header]): Response = Response(status, ByteString(sbody), headers)
   def apply(status: Status, sbody: String): Response = Response(status, ByteString(sbody), defaultHeaders)
 
   implicit def stringToBytes(s: String): ByteString = ByteString(s)
+
+  def NotFound(path: String): Response = Response(Status(404), s"Error 404!\nNo resource was found at path: '$path'")
 }

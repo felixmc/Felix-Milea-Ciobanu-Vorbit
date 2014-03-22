@@ -7,7 +7,7 @@ import akka.util.ByteString
 import com.felixmilea.vorbit.http.Util._
 import com.felixmilea.vorbit.utils.Loggable
 
-class HttpHandler(responder: RequestResponder) extends Actor with Loggable {
+class HttpHandler(responder: RootNode) extends Actor with Loggable {
   import Tcp._
   import com.felixmilea.vorbit.http.Constants._
   import com.felixmilea.vorbit.http.RichByteString._
@@ -18,7 +18,7 @@ class HttpHandler(responder: RequestResponder) extends Actor with Loggable {
       Debug("req:  " + req)
 
       val resp = responder.respond(req)
-      Debug("resp: " + req)
+      Warning("resp: " + resp)
 
       sender() ! Write(resp.compose)
 
@@ -44,7 +44,7 @@ class HttpHandler(responder: RequestResponder) extends Actor with Loggable {
   }
 
   def readRequestURI(data: RichByteString): (Seq[String], Seq[Parameter]) = {
-    val uri = (data takeUntil SP)
+    val uri: RichByteString = (data takeUntil SP)
     val path = parsePath(uri takeUntil QUESTION)
     val query = parseQuery(uri)
 

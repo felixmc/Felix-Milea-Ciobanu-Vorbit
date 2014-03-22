@@ -1,20 +1,29 @@
 <div class="header">
 	<p></p>
 </div>
-<div class="widget">
-	<select id="datasets">
-		<option value="" disabled selected>select dataset</option>
-		<option value="1grams">Smart Bot</option>
-		<option value="2grams">Answer Bot</option>
-		<option value="3grams">Unidan Bot</option>
+<div class="toolbar">
+	<select name="dataset" class="miners-list">
+		<option value="" disabled selected>dataset</option>
 	</select>
 
-	<select id="subsets">
-		<option value="" disabled selected>select dataset</option>
-		<option value="1grams">Parents</option>
-		<option value="3grams">Children</option>
+	<select name="subset" class="subsets-list">
+		<option value="" disabled selected>subset</option>
 	</select>
 
-	<textarea></textarea>
-	<button>generate</button>
+	<select name="edition" class="editions-list">
+		<option value="" disabled selected>edition</option>
+	</select>
+
+	<select name="n">
+		<option value="" disabled selected>n complexity</option>
+		<option value="1">Unigrams</option>
+		<option value="2">Bigrams</option>
+		<option value="3">Trigrams</option>
+		<option value="4">Quadgrams</option>
+	</select>
+
+	<button id="compose" class="button">compose</button>
+	<div class="loading"></div>
+	<button id="clear" class="button red">clear</button>
 </div>
+<div id="compose-result"></div>
